@@ -1,0 +1,15 @@
+*.whl
+.env
+.env_runtime
+.ipynb_checkpoints
+.vscode
+__pycache__
+.DS_Store
+.env
+.web
+boto3/
+
+
+# local copies
+agent-old.py
+knowledge_bases-old.py
