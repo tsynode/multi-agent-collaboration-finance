@@ -51,16 +51,20 @@ import zipfile
 from io import BytesIO
 from typing import List, Dict
 from boto3.session import Session
+from boto3.dynamodb.conditions import Key
 import re
 import logging
+
 
 PYTHON_TIMEOUT = 180
 PYTHON_RUNTIME = 'python3.12'
 DEFAULT_ALIAS = "TSTALIASID"
 
+
 # # setting logger
 logging.basicConfig(format='[%(asctime)s] p%(process)s {%(filename)s:%(lineno)d} %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class AgentsForAmazonBedrock:
     """Provides an easy to use wrapper for Agents for Amazon Bedrock.
@@ -84,6 +88,8 @@ class AgentsForAmazonBedrock:
         self._iam_client = boto3.client('iam',region_name=self._region)
         self._lambda_client = boto3.client('lambda',region_name=self._region)
         self._s3_client = boto3.client('s3',region_name=self._region)
+        self._dynamodb_client = boto3.client('dynamodb',region_name=self._region)
+        self._dynamodb_resource = boto3.resource('dynamodb',region_name=self._region)
 
         self._suffix = f"{self._region}-{self._account_id}"
 
@@ -92,7 +98,8 @@ class AgentsForAmazonBedrock:
         return self._region
     
     def _create_lambda_iam_role(self, agent_name: str,
-                                sub_agent_arns: List[str]=None) -> object:
+                                sub_agent_arns: List[str]=None,
+                                dynamo_table_name: str=None) -> object:
         """Creates an IAM role for a Lambda function built to implement an Action Group for an Agent.
         
         Args:
@@ -103,7 +110,7 @@ class AgentsForAmazonBedrock:
             str: ARN of the new IAM role, to be used when creating a Lambda function
         """
         _lambda_function_role_name = f'{agent_name}-lambda-role-{self._suffix}'
-
+        _dynamodb_access_policy_name = f'{agent_name}-dynamodb-policy'
 
         # Create IAM Role for the Lambda function
         try:
@@ -138,6 +145,46 @@ class AgentsForAmazonBedrock:
             RoleName=_lambda_function_role_name,
             PolicyArn='arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
         )
+
+        if dynamo_table_name:
+
+            # Create a policy to grant access to the DynamoDB table
+            dynamodb_access_policy = {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "dynamodb:GetItem",
+                            "dynamodb:Query",
+                            "dynamodb:PutItem",
+                            "dynamodb:DeleteItem"
+                        ],
+                        "Resource": "arn:aws:dynamodb:{}:{}:table/{}".format(
+                            self._region, self._account_id, dynamo_table_name
+                        )
+                    }
+                ]
+            }
+
+            # Create the policy
+            dynamodb_access_policy_json = json.dumps(dynamodb_access_policy)
+            try:
+                dynamodb_access_policy = self._iam_client.create_policy(
+                    PolicyName=_dynamodb_access_policy_name,
+                    PolicyDocument=dynamodb_access_policy_json
+                )
+            except self._iam_client.exceptions.EntityAlreadyExistsException:
+                dynamodb_access_policy = self._iam_client.get_policy(
+                    PolicyArn=f"arn:aws:iam::{self._account_id}:policy/{_dynamodb_access_policy_name}"
+                )
+            
+            # Attach the policy to the Lambda function's role
+            self._iam_client.attach_role_policy(
+                RoleName=_lambda_function_role_name,
+                PolicyArn=dynamodb_access_policy['Policy']['Arn']
+            )
+
 
         # create a policy to allow Lambda to invoke sub-agents and look up info about each sub-agent.
         # include the ability to invoke the agent based on its ID, and allow use of any Agent Alias.
@@ -276,7 +323,8 @@ class AgentsForAmazonBedrock:
                       agent_name: str,
                       lambda_function_name: str, 
                       source_code_file: str,
-                      sub_agent_arns: List[str]) -> str:
+                      sub_agent_arns: List[str],
+                      dynamo_args: List[str]) -> str:
         """Creates a new Lambda function that implements a set of actions for an Agent Action Group.
         
         Args:
@@ -303,18 +351,29 @@ class AgentsForAmazonBedrock:
         z.close()
         zip_content = s.getvalue()
 
+        if dynamo_args:
+            # add DynamoDB Table permissions to the Lambda Function
+            lambda_role = self._create_lambda_iam_role(agent_name, sub_agent_arns, dynamo_args[0])
+            # create DynamoDB Table to be used on Lambda Code
+            self.create_dynamodb(dynamo_args[0],dynamo_args[1],dynamo_args[2])
+        else:
+            lambda_role = self._create_lambda_iam_role(agent_name, sub_agent_arns)
+
         # Create Lambda Function
         _lambda_function = self._lambda_client.create_function(
             FunctionName=lambda_function_name,
             Runtime=PYTHON_RUNTIME,
             Timeout=PYTHON_TIMEOUT,
-            Role=self._create_lambda_iam_role(agent_name, sub_agent_arns),
+            Role=lambda_role,
             Code={'ZipFile': zip_content},
             Handler=f"{_base_filename}.lambda_handler",
             # TODO: make this an optional keyword arg. only supply it when sub-agent-arns are provided
             Environment={
                 'Variables': {
-                    'SUB_AGENT_IDS': self._make_agent_string(sub_agent_arns)
+                    'SUB_AGENT_IDS': self._make_agent_string(sub_agent_arns),
+                    'dynamodb_table': dynamo_args[0],
+                    'dynamodb_pk': dynamo_args[1],
+                    'dynamodb_sk': dynamo_args[2]
                 }
             }
         )
@@ -325,7 +384,8 @@ class AgentsForAmazonBedrock:
     
     def delete_lambda(self, 
                       lambda_function_name: str,
-                      delete_role_flag: bool=True) -> None:
+                      delete_role_flag: bool=True,
+                      dynamoDB_table: str=None) -> None:
         """Deletes the specified Lambda function.
         Optionally, deletes the IAM role that was created for the Lambda function.
         Optionally, deletes the policy that was created for the Lambda function.
@@ -358,6 +418,15 @@ class AgentsForAmazonBedrock:
             )
         except Exception as e:
             logger.warning(f"Ignored exception {e}")
+
+        # Delete DynamoDB Table
+        if dynamoDB_table:
+            try:
+                self._dynamodb_client.delete_table(
+                    TableName=dynamoDB_table
+                )
+            except Exception as e:
+                logger.warning(f"Ignored exception {e}")
 
 
     def get_agent_role(self, agent_name: str) -> str:
@@ -615,7 +684,8 @@ class AgentsForAmazonBedrock:
                                      agent_functions: List[Dict], 
                                      agent_action_group_name: str, 
                                      agent_action_group_description: str,
-                                     sub_agent_arns: List[str]=None) -> None:
+                                     sub_agent_arns: List[str]=None,
+                                     dynamo_args: List[str]=None) -> None:
         """Adds an action group to an existing agent, creates a Lambda function to 
         implement that action group, and prepares the agent so it is ready to be
         invoked.
@@ -637,7 +707,9 @@ class AgentsForAmazonBedrock:
         _lambda_arn = self.create_lambda(agent_name, 
                                          lambda_function_name, 
                                          source_code_file,
-                                         sub_agent_arns)
+                                         sub_agent_arns,
+                                         dynamo_args)
+        
         _agent_action_group_resp = self._bedrock_agent_client.create_agent_action_group(
                 agentId=_agent_id,
                 agentVersion='DRAFT',
@@ -1135,17 +1207,6 @@ class AgentsForAmazonBedrock:
                     collaborationInstruction=sub_agent['sub_agent_instruction'],
                     relayConversationHistory=sub_agent['relay_conversation_history']
                 )
-            '''
-            association_response = self._bedrock_agent_client.create_agent_association(
-                    agentId=supervisor_agent_id,
-                    agentVersion='DRAFT',
-                    agentMember={
-                        'aliasArn': sub_agent['sub_agent_alias_arn']
-                    },
-                    associationName=sub_agent['sub_agent_association_name'],
-                    scenarioDescription=sub_agent['sub_agent_instruction'],
-                    conversationHistorySharing=sub_agent['relay_conversation_history']
-                )'''
             response.append(association_response)
             self.wait_agent_status_update(supervisor_agent_id)
 
@@ -1168,3 +1229,70 @@ class AgentsForAmazonBedrock:
                 agent_status = 'DELETED'
         print(f'Agent id {agent_id} current status: {agent_status}')
         
+
+    def create_dynamodb(self, table_name, pk_item, sk_item):
+        try:
+            table = self._dynamodb_resource.create_table(
+                TableName=table_name,
+                KeySchema=[
+                    {
+                        'AttributeName': pk_item,
+                        'KeyType': 'HASH'
+                    },
+                    {
+                        'AttributeName': sk_item,
+                        'KeyType': 'RANGE'
+                    }
+                ],
+                AttributeDefinitions=[
+                    {
+                        'AttributeName': pk_item,
+                        'AttributeType': 'S'
+                    },
+                    {
+                        'AttributeName': sk_item,
+                        'AttributeType': 'S'
+                    }
+                ],
+                BillingMode='PAY_PER_REQUEST'  # Use on-demand capacity mode
+            )
+
+            # Wait for the table to be created
+            #print(f'Creating table {table_name}...')
+            table.wait_until_exists()
+            #print(f'Table {table_name} created successfully!')
+        except self._dynamodb_client.exceptions.ResourceInUseException:
+            print(f'Table {table_name} already exists, skipping table creation step')
+
+
+    def load_dynamodb(self, 
+                      table_name: str, 
+                      items: List):
+        try:
+
+            table = self._dynamodb_resource.Table(table_name)
+            for item in items:
+                table.put_item(Item=item)
+        except self._dynamodb_client.exceptions.ResourceInUseException:
+            print(f'Error on loading process for table: {table_name}.')
+
+
+    def query_dynamodb(self, 
+                      table_name: str, 
+                      pk_field: str,
+                      pk_value: str,
+                      sk_field: str=None, 
+                      sk_value: str=None):
+        try:
+
+            table = self._dynamodb_resource.Table(table_name)
+            # Create expression
+            if sk_field:
+                key_expression = Key(pk_field).eq(pk_value) & Key(sk_field).begins_with(sk_value)
+            else:
+                key_expression = Key(pk_field).eq(pk_value)
+
+            query_data = table.query(KeyConditionExpression=key_expression)
+            return query_data['Items']
+        except self._dynamodb_client.exceptions.ResourceInUseException:
+            print(f'Error querying table: {table_name}.')
