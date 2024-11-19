@@ -4,12 +4,13 @@ import os
 
 from boto3.dynamodb.conditions import Key, Attr
 from datetime import datetime
+from decimal import Decimal
 
 dynamodb_resource = boto3.resource('dynamodb')
 dynamodb_table = os.getenv('dynamodb_table')
 dynamodb_pk = os.getenv('dynamodb_pk')
 dynamodb_sk = os.getenv('dynamodb_sk')
-current_month = "{}/01".format(datetime.today().strftime("%Y/%m"))
+truncated_month = datetime.today().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
 
 def get_named_parameter(event, name):
@@ -18,6 +19,14 @@ def get_named_parameter(event, name):
 def populate_function_response(event, response_body):
     return {'response': {'actionGroup': event['actionGroup'], 'function': event['function'],
                 'functionResponse': {'responseBody': {'TEXT': {'body': str(response_body)}}}}}
+
+def trunc_datetime(month,year):
+    return datetime.today().replace(year =int(year), month=int(month), day=1, hour=0, minute=0, second=0, microsecond=0)
+
+def put_dynamodb(table_name, item):
+    table = dynamodb_resource.Table(table_name)
+    resp = table.put_item(Item=item)
+    return 
 
 def read_dynamodb(table_name: str, 
                    pk_field: str,
@@ -67,10 +76,21 @@ def get_consumption_statistics(customer_id):
                          dynamodb_pk, 
                          customer_id, 
                          dynamodb_sk, 
-                         current_month)
+                         truncated_month.strftime('%Y/%m/%d'))
 
-def update_forecasting(customer_id):
-    return "forecast updated for customer: {}".format(customer_id)
+def update_forecasting(customer_id, month, year, usage):
+    current_date = trunc_datetime(month, year)
+    if  current_date >= truncated_month:
+        item = {
+            'customer_id': customer_id,
+            'day': current_date.strftime('%Y/%m/%d'),
+            'sumPowerReading': Decimal(usage),
+            'kind': 'forecasted'
+        }
+        put_dynamodb(dynamodb_table, item)
+        return "Day: {} updated for customer: {}".format(current_date.strftime('%Y/%m/%d'), customer_id)
+    else:
+        return "You're trying to change a past date: {} for customer: {}, which is not allowed".format(current_date.strftime('%Y/%m/%d'), customer_id)
 
 def lambda_handler(event, context):
     print(event)
@@ -89,7 +109,10 @@ def lambda_handler(event, context):
     elif function == 'get_consumption_statistics':
         result = get_consumption_statistics(customer_id)
     elif function == 'update_forecasting':
-        result = update_forecasting(customer_id)
+        month = get_named_parameter(event, "month")
+        year = get_named_parameter(event, "year")
+        usage = get_named_parameter(event, "usage")
+        result = update_forecasting(customer_id, month, year, usage)
     else:
         result = f"Error, function '{function}' not recognized"
 
