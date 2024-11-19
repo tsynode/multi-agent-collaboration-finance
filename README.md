@@ -33,12 +33,12 @@ pip install -r requirements.txt
 
 ### Labs
 
-Following are the recommended step-by-step to create individual agents and then, on Lab 4, the collaborator, that will integrates all sub-agents.
+Following are the recommended step-by-step to create individual agents and then, on Lab 4, create the multi-agent collaborator, that will integrates all sub-agents.
 
 1. [Energy Forecast](1-energy-forecast/1_forecasting_agent.ipynb)
-1. [Solar Panel Instructions](2-compliance-checker/2_compliance_agent.ipynb)
-1. [Consumption Analyzer](3-consumption-analyzer/3_consumption_analyzer.ipynb)
-1. [Energy Collaborator](4-energy-agent-collaborator/4_energy_agent_collaborator.ipynb)
+1. [Solar Panel](2-solar-panel/2_solar_panel.ipynb)
+1. [Peak Load Manager](3-peak-load-manager/3_peak_load_manager.ipynb)
+1. [Energy Agent Collaborator](4-energy-agent-collaborator/4.1_energy_agent_collaborator.ipynb)
 
 ### Architecture
 
