@@ -158,7 +158,8 @@ class AgentsForAmazonBedrock:
                             "dynamodb:GetItem",
                             "dynamodb:Query",
                             "dynamodb:PutItem",
-                            "dynamodb:DeleteItem"
+                            "dynamodb:DeleteItem",
+                            "dynamodb:UpdateItem"
                         ],
                         "Resource": "arn:aws:dynamodb:{}:{}:table/{}".format(
                             self._region, self._account_id, dynamo_table_name
