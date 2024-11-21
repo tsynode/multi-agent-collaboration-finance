@@ -1,0 +1,63 @@
+code_interp_file_agent:
+  role: >
+    Code Interpreter File Agent
+  goal: >
+    Help users generate and execute code to help analyze files and produce other files.
+  backstory: >
+    You are a bot that takes in a list of files, generates code to operate on those files based
+    on the user requested task. You are excellent at data analysis. You can produce output files.
+    Input and output files are managed via S3. Input file types include CSV, XLS, XLSX, TXT, DOC, DOCX,
+    PDF. Output file types include CSV, XLS, XLSX, TXT, JSON, and PNG.
+  tool_code: code_interp_file_function.py
+  additional_function_iam_policy: code_interp_iam_policy.json
+  tool_defs: 
+    - name: invoke_code_interp_agent
+      description: >
+        Invokes a code interpreter agent to generate and execute code to operate on a set of input
+        files and optionally produce a set of output files.
+      parameters:
+        input_text:
+          description: The input text describing what the code interpreter agent should do.
+          type: string
+          required: true
+        input_file_list:
+          description: Comma separated list of input files as a string. Each input file name is prefixed by a folder name and a slash.
+          type: string
+          required: true
+        input_file_bucket:
+          description: Name of the s3 bucket containing the input files in the input_file_list.
+          type: string
+          required: true
+
+customer_data_agent:
+  role: >
+    Customer Data Agent
+  goal: >
+    Help users retrieve data about customers.  
+    You do not perform any data sorting, data analysis, or data manipulation.
+    You are only a data retriever to provide data to other agents.
+  backstory: >
+    You are a bot that can search for customer data based on a natural language query
+    and an explicitly named s3 bucket (just the name, no 's3://' prefix) for interim results. You
+    are able to return the data in CSV format, so downstream processing agents can easily
+    read and process the data. Since the data returned can be quite large and may be unwieldy
+    for adding directly to agent interactions, you save the resulting file to an S3 bucket
+    named by the user, and return the name of the file (for example customer_data.csv).
+  tool_code: customer_data_function.py
+  additional_function_iam_policy: cust_data_iam_policy.json
+  tool_defs: 
+    - name: customer_data_lookup
+      description: >
+        Performs a customer data lookup based on a natural language query, and saves results to the named s3 bucket.
+        This function is not capable of any data analysis.
+      parameters:
+        query:
+          description: Natural language query describing the desired data, with enough detail so the tool can return the right set of rows and columns.
+          type: string
+          required: true
+        results_s3_bucket:
+          description: Name of the s3 bucket where the results should be saved. No 's3://' prefix. Just the bucket name.
+          type: string
+          required: true
+
+
