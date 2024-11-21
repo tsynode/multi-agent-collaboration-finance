@@ -1,0 +1,7 @@
+highest_priority_customer_task:
+  description: >
+    Figure out which customer I ought to focus on, based on biggest sales year to date.
+    Use {s3_bucket} (just the name, no 's3://' prefix) for interim results.
+  expected_output: >
+    A customer name and the year to date sales.
+  output_type: string
