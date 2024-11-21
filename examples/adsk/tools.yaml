@@ -1,0 +1,67 @@
+web_search:
+  code: arn:aws:lambda:us-west-2:355151823911:function:websearch_lambda
+  definition: 
+    name: web_search
+    description: >
+      Searches the web given a query and returns a set of results as text.
+    parameters:
+      search_query:
+        description: The query to search the web with.
+        type: string
+        required: true
+      target_website:
+        description: The specific website to search including its domain name. If not provided, the most relevant website will be used.
+        type: string
+        required: false
+      topic:
+        description: The topic being searched. 'news' or 'general'. Helps narrow the search when news is the focus.
+        type: string
+        required: false
+      days:
+        description: The number of days of history to search. Helps when looking for recent events or news.
+        type: integer
+        required: false
+          
+save_file:
+  code: arn:aws:lambda:us-west-2:355151823911:function:agent_file_store
+  definition: 
+    name: save_file
+    description: >
+      Saves content to a named file in the file store.
+    parameters:
+      bucket:
+        description: The s3 bucket to use for file storage.
+        type: string
+        required: true
+      file_name:
+        description: The name of the file to save including a file extension. It can have a folder prefix.
+        type: string
+        required: true
+      folder_name:
+        description: The name of the folder to use, helping organize the file storage.
+        type: string
+        required: true
+      contents:
+        description: The contents to be saved to the file.
+        type: string
+        required: true
+
+get_file:
+  code: arn:aws:lambda:us-west-2:355151823911:function:agent_file_store
+  definition:
+    name: get_file
+    description: >
+      Returns the content found in a named file in the file store.
+    parameters:
+      bucket:
+        description: The s3 bucket used for file storage.
+        type: string
+        required: true
+      file_name:
+        description: The name of the file to retrieve including a file extension. It can have a folder prefix.
+        type: string
+        required: true
+      folder_name:
+        description: The name of the folder use when finding the file whose contents to retrieve.
+        type: string
+        required: true
