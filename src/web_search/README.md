@@ -1,4 +1,4 @@
-## Amazon Bedrock Multi-Agent Collaboration
+## Web Search Tool
 
 ## Security
 
