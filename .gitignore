@@ -5,7 +5,7 @@
 .vscode
 __pycache__
 .DS_Store
-.env
+.venv
 .web
 boto3/
 
