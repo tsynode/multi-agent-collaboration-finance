@@ -1127,60 +1127,6 @@ class AgentsForAmazonBedrock:
 
         return _update_agent_response
 
-
-    def create_agent_alias(self,
-                           agent_alias_name: str,
-                           agent_id: str):
-        """Create an alias for an agent
-
-        Args:
-            agent_alias_name (str): The name of the alias
-            agent_id (str): The Id of the agent
-
-        Returns:
-            alias_arn: Arn of the created alias
-        """
-        alias_arn = self._bedrock_agent_client.create_agent_alias(
-                    agentAliasName=agent_alias_name,
-                    agentId=agent_id
-                )
-        return alias_arn
-    
-    def delete_agent_alias(self,
-                           agent_alias_id: str,
-                           agent_id: str):
-        """Delete an alias for an agent
-
-        Args:
-            agent_alias_id (str): The id of the alias
-            agent_id (str): The Id of the agent
-
-        Returns:
-            alias_arn: Arn of the created alias
-        """
-        alias_arn = self._bedrock_agent_client.delete_agent_alias(
-                    agentAliasId=agent_alias_id,
-                    agentId=agent_id
-                )
-        return alias_arn
-        
-
-    def list_agent_aliases(self,
-                           agent_id: str):
-        """List alias for an agent
-
-        Args:
-            agent_id (str): The Id of the agent
-
-        Returns:
-            alias_arn: Arn of the created alias
-        """
-        alias_arn = self._bedrock_agent_client.list_agent_aliases(
-                    agentId=agent_id
-                )
-        return alias_arn
-
-
     def associate_agents(self,
                          supervisor_agent_id: str,
                          subagents_list: List):
@@ -1216,7 +1162,6 @@ class AgentsForAmazonBedrock:
         
         return response
     
-
     def wait_agent_status_update(self, agent_id):
         response = self._bedrock_agent_client.get_agent(agentId=agent_id)
         agent_status = response['agent']['agentStatus']
@@ -1230,7 +1175,6 @@ class AgentsForAmazonBedrock:
                 agent_status = 'DELETED'
         print(f'Agent id {agent_id} current status: {agent_status}')
         
-
     def create_dynamodb(self, table_name, pk_item, sk_item):
         try:
             table = self._dynamodb_resource.create_table(
@@ -1265,7 +1209,6 @@ class AgentsForAmazonBedrock:
         except self._dynamodb_client.exceptions.ResourceInUseException:
             print(f'Table {table_name} already exists, skipping table creation step')
 
-
     def load_dynamodb(self, 
                       table_name: str, 
                       items: List):
@@ -1276,7 +1219,6 @@ class AgentsForAmazonBedrock:
                 table.put_item(Item=item)
         except self._dynamodb_client.exceptions.ResourceInUseException:
             print(f'Error on loading process for table: {table_name}.')
-
 
     def query_dynamodb(self, 
                       table_name: str, 
