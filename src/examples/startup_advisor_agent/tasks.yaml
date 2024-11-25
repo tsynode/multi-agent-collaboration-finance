@@ -1,0 +1,48 @@
+research_task:
+  description: >
+    We are working on the following project: {project_description}.
+    Conduct thorough research about the target customers and competitors 
+    for the new product or service, while also taking into account the new web domain name
+    of {customer_domain}. Make sure you perform thorough research to find interesting 
+    and relevant information.
+  expected_output: >
+    A complete report on the target customer base and the competitors for the new
+    product or service. Get clarity about the customer demographics, their preferences, 
+    the market positioning with competition, and how the target audience gets engaged.
+
+marketing_strategy_task:
+  description: >
+    Formulate a comprehensive marketing strategy for the project
+    {project_description} which will have the new web domain name of {customer_domain}.
+    Use insights from the research task to help create a high-quality strategy.
+  expected_output: >
+    A detailed marketing strategy document that outlines the goals, target
+    audience, key messages, and proposed tactics. Be sure to also identify tactics,
+    marketing channels, and key metrics.
+
+campaign_idea_task:
+  description: >
+    Develop creative marketing campaign ideas for {project_description}.
+    Ensure the ideas are innovative, engaging, and aligned with the overall marketing strategy.
+    Be sure that at least one of the ideas is an online video ad campaign using a brief but powerful 
+    6-second video.
+  expected_output: >
+    A list of three campaign ideas, each with a brief description and the expected impact of the campaign.
+
+copy_creation_task:
+  description: >
+    Create marketing copy based on the approved campaign ideas for {project_description}.
+    Ensure the copy is compelling, clear, and tailored to the target audience. For a
+    TV ad campaign, provide details of the ad, not just an overview.
+  expected_output: >
+    For each marketing copy, a compelling title, a one line summary, and a few 
+    paragraphs of copy for each.
+
+final_edit_task:
+  description: >
+    The strategist hands you the draft marketing copy as input. 
+    You assess the marketing copy and you provide detailed feedback on how to improve it.
+    You then provide the final marketing copy which is both
+    comprehensive, clear, and tailored to the target audience.
+  expected_output: >
+    For each marketing copy, your feedback about the original draft, and your revised copy.

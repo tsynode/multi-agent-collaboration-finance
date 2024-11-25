@@ -1,8 +1,4 @@
-## Amazon Bedrock Multi-Agent Collaboration
-
-```
-pip3 install -r requirements.txt 
-```
+## File Store Tool
 
 ## Security
 
