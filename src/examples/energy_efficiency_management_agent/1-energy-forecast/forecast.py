@@ -26,7 +26,7 @@ def trunc_datetime(month,year):
 def put_dynamodb(table_name, item):
     table = dynamodb_resource.Table(table_name)
     resp = table.put_item(Item=item)
-    return 
+    return resp
 
 def read_dynamodb(table_name: str, 
                    pk_field: str,
@@ -40,7 +40,7 @@ def read_dynamodb(table_name: str,
         table = dynamodb_resource.Table(table_name)
         # Create expression
         if sk_field:
-            key_expression = Key(pk_field).eq(pk_value) & Key(sk_field).begins_with(sk_value)
+            key_expression = Key(pk_field).eq(pk_value) & Key(sk_field).eq(sk_value)
         else:
             key_expression = Key(pk_field).eq(pk_value)
 
