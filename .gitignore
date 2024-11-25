@@ -14,3 +14,4 @@ aws-lambda-developer-guide/
 # local copies
 agent-old.py
 knowledge_bases-old.py
+*.pptx

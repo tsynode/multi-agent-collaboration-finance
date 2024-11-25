@@ -10,7 +10,7 @@ This module contains utilities for building and using various Amazon Bedrock fea
 - [Utilize yaml files to define Agents and Tasks](#utilize-yaml-files-to-define-agents-and-tasks)
 - [Associate shared tools with Amazon Bedrock Agents](#associate-shared-tools-with-amazon-bedrock-agents)
 
-### Create and Manage Amazon Bedrock Agents
+## Create and Manage Amazon Bedrock Agents
 
 This module contains a helper class for building and using Agents for Amazon Bedrock. The AgentsForAmazonBedrock class provides a convenient interface for working with Agents.It includes methods for creating, updating, and invoking Agents, as well as managing IAM roles and Lambda functions for action groups. Here is a quick example of using
 the classs:
@@ -50,7 +50,7 @@ Here is a summary of the most important methods:
 - add_action_group_with_lambda: Creates a new Action Group for an Agent, backed by Lambda.
 - simple_invoke_agent: Invokes an Agent with a given input.
 
-### Create and Manage Amazon Bedrock KnowledgeBase
+## Create and Manage Amazon Bedrock KnowledgeBase
 
 This module contains a helper class for building and using Knowledge Bases for Amazon Bedrock. The KnowledgeBasesForAmazonBedrock class provides a convenient interface for working with Knowledge Bases. It includes methods for creating, updating, and invoking Knowledge Bases, as well as managing IAM roles and OpenSearch Serverless. Here is a quick example of using the class:
 
@@ -75,7 +75,7 @@ Here is a summary of the most important methods:
 - create_or_retrieve_knowledge_base: Creates a new Knowledge Base or retrieves an existent one.
 - synchronize_data: Syncronize the Knowledge Base with the
 
-### Create and Manage Amazon Bedrock Multi-Agent Collaboration
+## Create and Manage Amazon Bedrock Multi-Agent Collaboration
 
 Check out `Hello World` example [here](/src/examples/00_hello_world_agent/).
 
@@ -104,13 +104,13 @@ hello_world_supervisor = SupervisorAgent.direct_create(
 )
 ```
 
-### Utilize yaml files to define Agents and Tasks
+## Utilize yaml files to define Agents and Tasks
 
 Few examples to utilize yaml files to define Agents and Tasks can be found here:
 
 - **[Sports Team Poet Agent](/src/examples/team_poems_agent/)** This is a fun example for sports fans. The Sports Team Poet is a supervisor with a Research Agent and a Sports Poetry Writer. Pick your favorite team (go Celtics!) and see multi-agents collaborate to conduct web research about your team and make a fun poem with those insights. Have fun!
 - **[Trip Planner Agent](/src/examples/trip_planner_agent/)** The Trip Planner uses a few sub-agents to help you build a robust itinerary given a destination and number of days. It leverages a Restaurant Scout and an Activity Finder to get great ideas, and an Intinerary Compiler to finish the job. Try it out for your next trip.
 
-### Associate shared tools with Amazon Bedrock Agents
+## Associate shared tools with Amazon Bedrock Agents
 
 For guidance follow instruction for individual tools [here](/src/shared/).
