@@ -13,12 +13,16 @@ Parameters:
   SerperApiKey:
     Type: String
     NoEcho: true
-    Description: API Key for Serper service
+    Description: Provide SerperApiKey API Key to utilize /google_search path
   
   TavilyApiKey:
     Type: String
     NoEcho: true
-    Description: API Key for Tavily service
+    Description: Provide TavilyApiKey API Key to utilize /web_search or /travily_ai_search path
+
+Conditions:
+  HasSerperApiKey: !Not [!Equals [!Ref SerperApiKey, '']]
+  HasTavilyApiKey: !Not [!Equals [!Ref TavilyApiKey, '']]
 
 Resources:
   #####################
@@ -27,6 +31,7 @@ Resources:
 
   SerperApiKeySecret:
     Type: 'AWS::SecretsManager::Secret'
+    Condition: HasSerperApiKey
     Properties:
       Name: 'SERPER_API_KEY'
       Description: 'API Key for Serper service'
@@ -34,6 +39,7 @@ Resources:
 
   TavilyApiKeySecret:
     Type: 'AWS::SecretsManager::Secret'
+    Condition: HasTavilyApiKey
     Properties:
       Name: 'TAVILY_API_KEY'
       Description: 'API Key for Tavily service'
@@ -73,11 +79,6 @@ Resources:
           logger = logging.getLogger(__name__)
           logger.setLevel(log_level)
 
-          # AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
-          # ACTION_GROUP_NAME = os.environ.get("ACTION_GROUP", "action-group-web-search-d213q")
-          FUNCTION_NAMES = ["tavily-ai-search", "google-search", "web_search"]
-
-
           def is_env_var_set(env_var: str) -> bool:
               return env_var in os.environ and os.environ[env_var] not in ("", "0", "false", "False")
 
@@ -99,20 +100,22 @@ Resources:
 
               return secret
 
+          FUNCTION_NAMES = ["tavily_ai_search", "google_search", "web_search"]
 
-          SERPER_API_KEY = get_from_secretstore_or_env("SERPER_API_KEY")
-          TAVILY_API_KEY = get_from_secretstore_or_env("TAVILY_API_KEY")
+          try:
+            SERPER_API_KEY = get_from_secretstore_or_env("SERPER_API_KEY")
+            FUNCTION_NAMES.append("google_search")
+          except Exception as e:
+            SERPER_API_KEY = None
 
+          try:
+            TAVILY_API_KEY = get_from_secretstore_or_env("TAVILY_API_KEY")
+            FUNCTION_NAMES.append("tavily_ai_search", "web_search")
+          except Exception as e:
+            TAVILY_API_KEY = None
 
           def extract_search_params(action_group, function, parameters):
-              # if action_group != ACTION_GROUP_NAME:
-              #     logger.error(f"unexpected name '{action_group}'; expected valid action group name '{ACTION_GROUP_NAME}'")
-              #     return None, None
-
-              if function not in FUNCTION_NAMES:
-                  logger.error(f"unexpected function name '{function}'; valid function names are'{FUNCTION_NAMES}'")
-                  return None, None
-
+          
               search_query = next(
                   (param["value"] for param in parameters if param["name"] == "search_query"),
                   None,
@@ -133,7 +136,7 @@ Resources:
                   None,
               )
 
-              logger.debug(f"extract_search_params: {search_query=} {target_website=}")
+              logger.debug(f"extract_search_params: {search_query=} {target_website=} {topic=} {days=}")
 
               return search_query, target_website, topic, days
 
@@ -198,6 +201,9 @@ Resources:
               parameters = event.get("parameters", [])
 
               logger.info(f"lambda_handler: {action_group=} {function=}")
+
+              if function not in FUNCTION_NAMES:
+                  raise
 
               search_query, target_website, topic, days = extract_search_params(action_group, function, parameters)
 

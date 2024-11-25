@@ -30,7 +30,7 @@
 
 * [ ] Have you included your Agent Example name in [README.md](https://github.com/aws-samples/bedrock-multi-agents-collaboration-workshop)?
 * [ ] Have you included your Agent Example introduction in [README.md](https://github.com/aws-samples/bedrock-multi-agents-collaboration-workshop/tree/main/src/examples)
-* [ ] Have you included Introduction, Architecture Diagram, Sample Prompts, and Clean Up steps?
+* [ ] Have you included Introduction, Architecture Diagram, Prerequisites, Usage, Sample Prompts, and Clean Up steps?
 * [ ] Have you appened `_agent` to the new folder name in `src/examples`?
 * [ ] I agree to resolve any [issues](https://github.com/aws-samples/bedrock-multi-agents-collaboration-workshop/issues) created for this example. 
 
