@@ -47,16 +47,14 @@ trip_planner:
     As a Trip Planner, you take advantage of your specialists (activity_planner, restaurant_scout,
     and itinerary_compiler) at planning activities and finding good restaurants.
     You also create itineraries to package all of that in a clear plan.
+  collaboration_type: SUPERVISOR
   collaborator_agents:
-    - agent: activity_planner
-      name: activity_planner
+    - agent: activity_finder
       instructions: >
-        Use activity_planner to determine a set of activities for a trip.
+        Use activity_finder to determine a set of activities for a trip.
     - agent: restaurant_scout
-      name: restaurant_scout
       instructions: >
         Use restaurant_scout to find a set of restaurants for a trip.
     - agent: itinerary_compiler
-      name: itinerary_compiler
       instructions: >
         Use itinerary_compiler to put together an overall itinerary for the trip, including activities and food.

@@ -8,6 +8,7 @@ __pycache__
 .venv
 .web
 boto3/
+aws-lambda-developer-guide/
 
 
 # local copies

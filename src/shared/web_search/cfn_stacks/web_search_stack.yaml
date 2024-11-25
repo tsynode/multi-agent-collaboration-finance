@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: This CloudFormation template deploy Web Search functionality using Amazon Bedrock Agents
+Description: This CloudFormation template deploy Web Search functionality using AWS Lambda Function
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -40,7 +40,7 @@ Resources:
       SecretString: !Ref TavilyApiKey
 
   ########################
-  ##### ActionGroup #####
+  ##### WebSearch #####
   ######################
 
   AgentLambdaFunction:
@@ -48,7 +48,7 @@ Resources:
     Properties:
       Runtime: python3.12
       FunctionName: websearch_lambda
-      Handler: lambda.lambda_handler
+      Handler: index.lambda_handler
       Role: !GetAtt AgentLambdaRole.Arn
       Timeout: 300
       Environment:
@@ -73,9 +73,9 @@ Resources:
           logger = logging.getLogger(__name__)
           logger.setLevel(log_level)
 
-          AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
-          ACTION_GROUP_NAME = os.environ.get("ACTION_GROUP", "action-group-web-search-d213q")
-          FUNCTION_NAMES = ["tavily-ai-search", "google-search"]
+          # AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
+          # ACTION_GROUP_NAME = os.environ.get("ACTION_GROUP", "action-group-web-search-d213q")
+          FUNCTION_NAMES = ["tavily-ai-search", "google-search", "web_search"]
 
 
           def is_env_var_set(env_var: str) -> bool:
@@ -88,7 +88,7 @@ Resources:
                   return os.environ[key]
 
               session = boto3.session.Session()
-              secrets_manager = session.client(service_name="secretsmanager", region_name=AWS_REGION)
+              secrets_manager = session.client(service_name="secretsmanager")#, region_name=AWS_REGION)
               try:
                   secret_value = secrets_manager.get_secret_value(SecretId=key)
               except Exception as e:
@@ -105,9 +105,9 @@ Resources:
 
 
           def extract_search_params(action_group, function, parameters):
-              if action_group != ACTION_GROUP_NAME:
-                  logger.error(f"unexpected name '{action_group}'; expected valid action group name '{ACTION_GROUP_NAME}'")
-                  return None, None
+              # if action_group != ACTION_GROUP_NAME:
+              #     logger.error(f"unexpected name '{action_group}'; expected valid action group name '{ACTION_GROUP_NAME}'")
+              #     return None, None
 
               if function not in FUNCTION_NAMES:
                   logger.error(f"unexpected function name '{function}'; valid function names are'{FUNCTION_NAMES}'")
@@ -123,9 +123,19 @@ Resources:
                   None,
               )
 
+              topic = next(
+                  (param["value"] for param in parameters if param["name"] == "topic"),
+                  None,
+              )
+
+              days = next(
+                  (param["value"] for param in parameters if param["name"] == "days"),
+                  None,
+              )
+
               logger.debug(f"extract_search_params: {search_query=} {target_website=}")
 
-              return search_query, target_website
+              return search_query, target_website, topic, days
 
 
           def google_search(search_query: str, target_website: str = "") -> str:
@@ -137,7 +147,7 @@ Resources:
               payload = json.dumps({"q": query})
               headers = {"X-API-KEY": SERPER_API_KEY, "Content-Type": "application/json"}
 
-              search_type = "news"  # "news", "search",
+              search_type = "search"  # "news", "search",
               conn.request("POST", f"/{search_type}", payload, headers)
               res = conn.getresponse()
               data = res.read()
@@ -145,7 +155,8 @@ Resources:
               return data.decode("utf-8")
 
 
-          def tavily_ai_search(search_query: str, target_website: str = "") -> str:
+          def tavily_ai_search(search_query: str, target_website: str = "",
+                              topic: str=None, days: int=None) -> str:
               logger.info(f"executing Tavily AI search with {search_query=}")
 
               base_url = "https://api.tavily.com/search"
@@ -158,6 +169,8 @@ Resources:
                   "include_answer": False,
                   "include_raw_content": False,
                   "max_results": 3,
+                  "topic": "general" if topic is None else topic,
+                  "days": 30 if days is None else days,
                   "include_domains": [target_website] if target_website else [],
                   "exclude_domains": [],
               }
@@ -177,7 +190,8 @@ Resources:
 
 
           def lambda_handler(event, _):  # type: ignore
-              logging.debug(f"lambda_handler {event=}")
+              print(event)
+              logging.debug(f"lambda_handler, event={event}")
 
               action_group = event["actionGroup"]
               function = event["function"]
@@ -185,11 +199,11 @@ Resources:
 
               logger.info(f"lambda_handler: {action_group=} {function=}")
 
-              search_query, target_website = extract_search_params(action_group, function, parameters)
+              search_query, target_website, topic, days = extract_search_params(action_group, function, parameters)
 
               search_results: str = ""
-              if function == "tavily-ai-search":
-                  search_results = tavily_ai_search(search_query, target_website)
+              if function in ["tavily-ai-search", "web_search"]:
+                  search_results = tavily_ai_search(search_query, target_website, topic, days)
               elif function == "google-search":
                   search_results = google_search(search_query, target_website)
 
