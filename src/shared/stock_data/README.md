@@ -1,8 +1,4 @@
-## Amazon Bedrock Multi-Agent Collaboration
-
-```
-pip3 install -r requirements.txt 
-```
+## Stock Data Tool
 
 ## Security
 
