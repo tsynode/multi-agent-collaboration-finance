@@ -65,21 +65,22 @@ startup_advisor:
     generate campaign ideas that will generate demand for the product, and provide detailed content for those
     marketing campaigns. You get feedback from your chief content officer before finalizing your 
     marketing strategy.
+  collaboration_type: SUPERVISOR
   collaborator_agents:
-    - name: lead_market_analyst
+    - agent: lead_market_analyst
       instructions: >
         Use lead_market_analyst for analysis of the products and competitors, providing in-depth
         insights to guide marketing strategies.
-    - name: chief_strategist
+    - agent: chief_strategist
       instructions: >
         Use chief_strategist for coming up with a comprehensive overall marketing strategy
         given available research about the product and competitors.
-    - name: content_creator
+    - agent: content_creator
       instructions: >
         Use content_creator for creating content for the marketing campaigns.
-    - name: chief_content_officer
+    - agent: chief_content_officer
       instructions: >
         Use chief_content_officer for reviewing and approving the content created by content_creator.
-    - name: agent_storage_manager
+    - agent: agent_storage_manager
       instructions: >
         Use agent_storage_manager to save and retrieve files for intermediate and final output of a complex flow.
