@@ -108,7 +108,7 @@ This library is licensed under the MIT-0 License. See the LICENSE file.
 
 ---
 
-> [!DISCLAIMER]   
+> [!IMPORTANT]
 > Examples in this repository are for demonstration purposes. 
 > Ensure proper security and testing when deploying to production environments.
 
