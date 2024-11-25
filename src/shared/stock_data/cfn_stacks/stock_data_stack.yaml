@@ -76,8 +76,10 @@ Resources:
       FunctionName: stock_data_lookup
       Layers: 
         - !Sub 
-            - ${StackId}
-            - StackId: !Select [2, !Split ['/', !Ref AWS::StackId]]
+            - arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:${LayerName}:1
+            - LayerName: !Sub 
+              - ${StackId}
+              - StackId: !Select [2, !Split ['/', !Ref AWS::StackId]]
         - !FindInMap 
           - AWSSDKPandasLayerMap
           - !Ref AWS::Region
