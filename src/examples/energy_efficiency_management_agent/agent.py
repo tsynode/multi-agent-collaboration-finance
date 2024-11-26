@@ -54,6 +54,10 @@ from boto3.session import Session
 from boto3.dynamodb.conditions import Key
 import re
 import logging
+import os
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from IPython.display import display, Markdown
 
 
 PYTHON_TIMEOUT = 180
@@ -72,36 +76,41 @@ class AgentsForAmazonBedrock:
 
     def __init__(self):
         """Constructs an instance."""
-        self._boto_session = Session() 
+        self._boto_session = Session()
         self._region = self._boto_session.region_name
-        self._account_id = boto3.client("sts",region_name=self._region).get_caller_identity()["Account"]
-        
+        print(self._region)
+        self._account_id = boto3.client(
+            "sts", region_name=self._region
+        ).get_caller_identity()["Account"]
 
-        self._bedrock_agent_client = boto3.client('bedrock-agent',
-                                                  region_name=self._region)
+        self._bedrock_agent_client = boto3.client(
+            'bedrock-agent',
+            region_name=self._region
+        )
 
-        self._bedrock_agent_runtime_client = boto3.client('bedrock-agent-runtime',
-                                                          region_name=self._region)
+        self._bedrock_agent_runtime_client = boto3.client(
+            'bedrock-agent-runtime',
+            region_name=self._region
+        )
 
-
-        self._sts_client = boto3.client('sts',region_name=self._region)
-        self._iam_client = boto3.client('iam',region_name=self._region)
-        self._lambda_client = boto3.client('lambda',region_name=self._region)
-        self._s3_client = boto3.client('s3',region_name=self._region)
-        self._dynamodb_client = boto3.client('dynamodb',region_name=self._region)
-        self._dynamodb_resource = boto3.resource('dynamodb',region_name=self._region)
+        self._sts_client = boto3.client('sts', region_name=self._region)
+        self._iam_client = boto3.client('iam', region_name=self._region)
+        self._lambda_client = boto3.client('lambda', region_name=self._region)
+        self._s3_client = boto3.client('s3', region_name=self._region)
+        self._dynamodb_client = boto3.client('dynamodb', region_name=self._region)
+        self._dynamodb_resource = boto3.resource('dynamodb', region_name=self._region)
 
         self._suffix = f"{self._region}-{self._account_id}"
 
     def get_region(self) -> str:
         """Returns the region for this instance."""
         return self._region
-    
+
     def _create_lambda_iam_role(self, agent_name: str,
-                                sub_agent_arns: List[str]=None,
-                                dynamo_table_name: str=None) -> object:
+                                sub_agent_arns: List[str] = None,
+                                dynamo_table_name: str = None) -> object:
         """Creates an IAM role for a Lambda function built to implement an Action Group for an Agent.
-        
+
         Args:
             agent_name (str): Name of the agent for which this Lambda supports, will be used as part of the role name
             sub_agent_arns (List[str], optional): List of sub-agent ARNs to allow this Lambda to invoke. Defaults to [].
@@ -179,13 +188,12 @@ class AgentsForAmazonBedrock:
                 dynamodb_access_policy = self._iam_client.get_policy(
                     PolicyArn=f"arn:aws:iam::{self._account_id}:policy/{_dynamodb_access_policy_name}"
                 )
-            
+
             # Attach the policy to the Lambda function's role
             self._iam_client.attach_role_policy(
                 RoleName=_lambda_function_role_name,
                 PolicyArn=dynamodb_access_policy['Policy']['Arn']
             )
-
 
         # create a policy to allow Lambda to invoke sub-agents and look up info about each sub-agent.
         # include the ability to invoke the agent based on its ID, and allow use of any Agent Alias.
@@ -217,7 +225,7 @@ class AgentsForAmazonBedrock:
                 RoleName=_lambda_function_role_name
             )
         return _lambda_iam_role['Role']['Arn']
-    
+
     def get_agent_id_by_name(self, agent_name: str) -> str:
         """Gets the Agent ID for the specified Agent.
 
@@ -234,7 +242,7 @@ class AgentsForAmazonBedrock:
             return None
         else:
             return _target_agent['agentId']
-        
+
     def associate_kb_with_agent(self, agent_id, description, kb_id):
         """Associates a Knowledge Base with an Agent, and prepares the agent.
 
@@ -268,7 +276,7 @@ class AgentsForAmazonBedrock:
             raise ValueError(f"Agent {agent_name} not found")
         _get_agent_resp = self._bedrock_agent_client.get_agent(agentId=_agent_id)
         return _get_agent_resp['agent']['agentArn']
-            
+
     def get_agent_instructions_by_name(self, agent_name: str) -> str:
         """Gets the current Agent Instructions that are used by the specified Agent.
 
@@ -286,10 +294,12 @@ class AgentsForAmazonBedrock:
         # extract the instructions from the response
         _instructions = _get_agent_resp['agent']['instruction']
         return _instructions
-    
-    def _allow_agent_lambda(self, 
-                           agent_id: str,
-                           lambda_function_name: str) -> None:
+
+    def _allow_agent_lambda(
+        self,
+        agent_id: str,
+        lambda_function_name: str
+    ) -> None:
         """Allows the specified Agent to invoke the specified Lambda function by adding the appropriate permission.
 
         Args:
@@ -305,8 +315,10 @@ class AgentsForAmazonBedrock:
             SourceArn=f"arn:aws:bedrock:{self._region}:{self._account_id}:agent/{agent_id}",
         )
 
-    def _make_agent_string(self,
-                           agent_arns: List[str]=None) -> str:
+    def _make_agent_string(
+        self,
+        agent_arns: List[str] = None
+    ) -> str:
         """Makes a comma separated string of agent ids from a list of agent ARNs.
 
         Args:
@@ -320,21 +332,23 @@ class AgentsForAmazonBedrock:
                 _agent_string += _agent_arn.split("/")[1] + ","
             return _agent_string.strip()[:-1]
 
-    def create_lambda(self, 
-                      agent_name: str,
-                      lambda_function_name: str, 
-                      source_code_file: str,
-                      sub_agent_arns: List[str],
-                      dynamo_args: List[str]) -> str:
+    def create_lambda(
+        self,
+        agent_name: str,
+        lambda_function_name: str,
+        source_code_file: str,
+        sub_agent_arns: List[str],
+        dynamo_args: List[str]
+    ) -> str:
         """Creates a new Lambda function that implements a set of actions for an Agent Action Group.
-        
+
         Args:
             agent_name (str): Name of the existing Agent that this Lambda will support.
             lambda_function_name (str): Name of the Lambda function to create.
             source_code_file (str): Name of the file containing the Lambda source code. 
             Must be a local file, and use underscores, not hyphens.
             sub_agent_arns (List[str]): List of ARNs of the sub-agents that this Lambda is allowed to invoke.
-            
+
         Returns:
             str: ARN of the new Lambda function
         """
@@ -342,7 +356,6 @@ class AgentsForAmazonBedrock:
         _agent_id = self.get_agent_id_by_name(agent_name)
         if _agent_id is None:
             return "Agent not found"
-        
         _base_filename = source_code_file.split('.py')[0]
 
         # Package up the lambda function code
@@ -354,11 +367,19 @@ class AgentsForAmazonBedrock:
 
         if dynamo_args:
             # add DynamoDB Table permissions to the Lambda Function
-            lambda_role = self._create_lambda_iam_role(agent_name, sub_agent_arns, dynamo_args[0])
+            lambda_role = self._create_lambda_iam_role(
+                agent_name, sub_agent_arns, dynamo_args[0]
+            )
             # create DynamoDB Table to be used on Lambda Code
-            self.create_dynamodb(dynamo_args[0],dynamo_args[1],dynamo_args[2])
+            self.create_dynamodb(
+                dynamo_args[0],
+                dynamo_args[1],
+                dynamo_args[2]
+            )
         else:
-            lambda_role = self._create_lambda_iam_role(agent_name, sub_agent_arns)
+            lambda_role = self._create_lambda_iam_role(
+                agent_name, sub_agent_arns
+            )
 
         # Create Lambda Function
         _lambda_function = self._lambda_client.create_function(
@@ -383,10 +404,12 @@ class AgentsForAmazonBedrock:
 
         return _lambda_function['FunctionArn']
     
-    def delete_lambda(self, 
-                      lambda_function_name: str,
-                      delete_role_flag: bool=True,
-                      dynamoDB_table: str=None) -> None:
+    def delete_lambda(
+        self,
+        lambda_function_name: str,
+        delete_role_flag: bool = True,
+        dynamoDB_table: str = None
+    ) -> None:
         """Deletes the specified Lambda function.
         Optionally, deletes the IAM role that was created for the Lambda function.
         Optionally, deletes the policy that was created for the Lambda function.
@@ -400,17 +423,20 @@ class AgentsForAmazonBedrock:
         # Detach and delete the role
         if delete_role_flag:
             try:
-                _function_resp = self._lambda_client.get_function(FunctionName=lambda_function_name)
+                _function_resp = self._lambda_client.get_function(
+                    FunctionName=lambda_function_name
+                )
                 _role_arn = _function_resp['Configuration']['Role']
                 _role_name = _role_arn.split('/')[1]
-                self._iam_client.detach_role_policy(RoleName=_role_name, 
-                                PolicyArn='arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole')
+                self._iam_client.detach_role_policy(
+                    RoleName=_role_name,
+                    PolicyArn='arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+                )
                 self._iam_client.delete_role(
                     RoleName=_role_name
                 )
             except Exception as e:
                 logger.warning(f"Ignored exception {e}")
-                #pass
 
         # Delete Lambda function
         try:
@@ -429,7 +455,6 @@ class AgentsForAmazonBedrock:
             except Exception as e:
                 logger.warning(f"Ignored exception {e}")
 
-
     def get_agent_role(self, agent_name: str) -> str:
         """Gets the ARN of the IAM role that is associated with the specified Agent.
 
@@ -439,9 +464,14 @@ class AgentsForAmazonBedrock:
         Returns:
             str: ARN of the IAM role, or None if not found
         """
-        _get_agents_resp = self._bedrock_agent_client.list_agents(maxResults=100) 
+        _get_agents_resp = self._bedrock_agent_client.list_agents(
+            maxResults=100
+        )
         _agents_json = _get_agents_resp['agentSummaries']
-        _target_agent = next((agent for agent in _agents_json if agent["agentName"] == agent_name), None)
+        _target_agent = next(
+            (agent for agent in _agents_json if agent["agentName"] == agent_name),
+            None
+        )
         if _target_agent is not None:
             # pprint.pp(_target_agent)
             _agent_id = _target_agent['agentId']
@@ -451,10 +481,12 @@ class AgentsForAmazonBedrock:
         else:
             return "Agent not found"
 
-    def delete_agent(self, agent_name: str,
-                     delete_role_flag: bool=True) -> None:
+    def delete_agent(
+        self, agent_name: str,
+        delete_role_flag: bool=True
+    ) -> None:
         """Deletes an existing agent. Optionally, deletes the IAM role associated with the agent.
-        
+
         Args:
             agent_name (str): Name of the agent to delete.
             delete_role_flag (bool, Optional): Flag indicating whether to delete the IAM role associated with the agent.
@@ -462,9 +494,14 @@ class AgentsForAmazonBedrock:
         """
 
         # first find the agent ID from the agent Name
-        _get_agents_resp = self._bedrock_agent_client.list_agents(maxResults=100)
+        _get_agents_resp = self._bedrock_agent_client.list_agents(
+            maxResults=100
+        )
         _agents_json = _get_agents_resp['agentSummaries']
-        _target_agent = next((agent for agent in _agents_json if agent["agentName"] == agent_name), None)
+        _target_agent = next(
+            (agent for agent in _agents_json if agent["agentName"] == agent_name),
+            None
+        )
 
         # TODO: add delete_lambda_flag parameter to optionall take care of
         # deleting the lambda function associated with the agent.
@@ -479,10 +516,7 @@ class AgentsForAmazonBedrock:
                     RoleName=_agent_role_name
                 )
             except Exception as e:
-                # print(f'Error when deleting bedrock_kb_allow_policy from role: {_agent_role_name}\n{e}')
                 logger.warning(f"Ignored exception {e}")
-                #pass
-
             try:
                 self._iam_client.delete_role_policy(
                     PolicyName="bedrock_allow_policy", 
@@ -491,18 +525,13 @@ class AgentsForAmazonBedrock:
             except Exception as e:
                 print(f'Error when deleting bedrock_allow_policy from role: {_agent_role_name}\n{e}')
                 logger.warning(f"Ignored exception {e}")
-                #pass
-
             try:
                 self._iam_client.delete_role_policy(
-                    PolicyName="bedrock_kb_allow_policy", 
+                    PolicyName="bedrock_kb_allow_policy",
                     RoleName=_agent_role_name
                 )
             except Exception as e:
-                # print(f'Error when deleting bedrock_kb_allow_policy from role: {_agent_role_name}\n{e}')
                 logger.warning(f"Ignored exception {e}")
-                #pass
-
             try:
                 self._iam_client.delete_role(
                     RoleName=_agent_role_name
@@ -510,29 +539,28 @@ class AgentsForAmazonBedrock:
             except Exception as e:
                 print(f'Error when deleting role: {_agent_role_name} from agent: {agent_name}\n{e}')
                 logger.warning(f"Ignored exception {e}")
-                #pass
-
         # if the agent exists, delete the agent
         if _target_agent is not None:
             # pprint.pp(_target_agent)
             _agent_id = _target_agent['agentId']
 
-
             self._bedrock_agent_client.delete_agent(
                 agentId=_agent_id
-                )
-        
-    def _create_agent_role(self, 
-                             agent_name: str,
-                             agent_foundation_models: List[str],
-                             kb_arns: List[str]=None) -> str:
+            )
+
+    def _create_agent_role(
+        self,
+        agent_name: str,
+        agent_foundation_models: List[str],
+        kb_arns: List[str] = None
+    ) -> str:
         """Creates an IAM role for an agent.
-        
+
         Args:
             agent_name (str): name of the agent for this new role
             agent_foundation_models (List[str]): List of IDs or Arn's of the Bedrock foundation model(s) this agent is allowed to use
             kb_arns (List[str], Optional): List of ARNs of the Knowledge Base(s) this agent is allowed to use
-        
+
         Returns:
             str: the Arn for the new role
         """
@@ -616,7 +644,6 @@ class AgentsForAmazonBedrock:
                             "bedrock:ApplyGuardrail"
                         ],
                         "Resource": f"arn:aws:bedrock:*:{self._account_id}:guardrail/*"
-                            # TODO: scope this down to a single GR passed as param
                     }]
             }
             _gr_policy_json = json.dumps(_gr_policy_doc)
@@ -625,10 +652,10 @@ class AgentsForAmazonBedrock:
                 PolicyName="bedrock_gr_allow_policy",
                 RoleName=_agent_role_name
             )
-        
+
         # Pause to make sure role is created
         time.sleep(5)
-            
+
         self._iam_client.put_role_policy(
             PolicyDocument=_bedrock_policy_json,
             PolicyName="bedrock_allow_policy",
@@ -637,13 +664,15 @@ class AgentsForAmazonBedrock:
 
         return _agent_role['Role']['Arn']
 
-    def create_agent(self,
-                     agent_name: str,
-                     agent_description: str,
-                     agent_instructions: str,
-                     model_ids: List[str],
-                     kb_arns: List[str]=None,
-                     agent_collaboration='DISABLED') -> str:
+    def create_agent(
+        self,
+        agent_name: str,
+        agent_description: str,
+        agent_instructions: str,
+        model_ids: List[str],
+        kb_arns: List[str] = None,
+        agent_collaboration='DISABLED'
+    ) -> str:
         """Creates an agent given a name, instructions, model, description, and optionally
         a set of knowledge bases. Action groups are added to the agent as a separate 
         step once you have created the agent itself.
@@ -656,11 +685,11 @@ class AgentsForAmazonBedrock:
             to create the agent, and the others will also be captured in the agent IAM role for future use
             kb_arns (List[str], Optional): ARNs of the Knowledge Base(s) this agent is allowed to use
             agent_collaboration: 'DISABLED' or 'SUPERVISOR_ROUTER': multi-agent collaboration feature
-        
+
         Returns:
             str: agent ID
         """
-        
+
         _role_arn = self._create_agent_role(agent_name, model_ids, kb_arns)
 
         # Pause to make sure permissions are replicated
@@ -677,20 +706,22 @@ class AgentsForAmazonBedrock:
                     )
         time.sleep(5)
         return response['agent']['agentId']
-    
-    def add_action_group_with_lambda(self,
-                                     agent_name: str,
-                                     lambda_function_name: str, 
-                                     source_code_file: str,
-                                     agent_functions: List[Dict], 
-                                     agent_action_group_name: str, 
-                                     agent_action_group_description: str,
-                                     sub_agent_arns: List[str]=None,
-                                     dynamo_args: List[str]=None) -> None:
+
+    def add_action_group_with_lambda(
+        self,
+        agent_name: str,
+        lambda_function_name: str,
+        source_code_file: str,
+        agent_functions: List[Dict],
+        agent_action_group_name: str,
+        agent_action_group_description: str,
+        sub_agent_arns: List[str] = None,
+        dynamo_args: List[str] = None
+    ) -> None:
         """Adds an action group to an existing agent, creates a Lambda function to 
         implement that action group, and prepares the agent so it is ready to be
         invoked.
-        
+
         Args:
             agent_name (str): name of the existing agent
             lambda_function_name (str): name of the Lambda function to create
@@ -700,17 +731,14 @@ class AgentsForAmazonBedrock:
             agent_action_group_description (str): description of the agent action group
             sub_agent_arns (List[str], Optional): list of ARNs of sub-agents (if any) to permit the Lambda to invoke
         """
-           
         _agent_id = self.get_agent_id_by_name(agent_name)
         if _agent_id is None:
             return "Agent not found"
-        
         _lambda_arn = self.create_lambda(agent_name, 
                                          lambda_function_name, 
                                          source_code_file,
                                          sub_agent_arns,
                                          dynamo_args)
-        
         _agent_action_group_resp = self._bedrock_agent_client.create_agent_action_group(
                 agentId=_agent_id,
                 agentVersion='DRAFT',
@@ -724,12 +752,34 @@ class AgentsForAmazonBedrock:
             )
         time.sleep(5) # make sure agent is ready to be invoked as soon as we return
         return
-        
-    def add_action_group_with_roc(self,
-            agent_id: str, 
-            agent_functions: List[Dict], 
-            agent_action_group_name: str, 
-            agent_action_group_description: str=None) -> None:
+
+    def add_code_interpreter(
+        self,
+        agent_name
+    ):
+        _agent_id = self.get_agent_id_by_name(agent_name)
+        if _agent_id is None:
+            return "Agent not found"
+        _agent_action_group_resp = self._bedrock_agent_client.create_agent_action_group(
+            agentId=_agent_id,
+            agentVersion='DRAFT',
+            actionGroupName='code-interpreter',
+            parentActionGroupSignature='AMAZON.CodeInterpreter',
+            actionGroupState='ENABLED'
+        )
+        _resp = self._bedrock_agent_client.prepare_agent(
+           agentId=_agent_id
+        )
+        time.sleep(5) # make sure agent is ready to be invoked as soon as we return
+        return
+
+    def add_action_group_with_roc(
+        self,
+        agent_id: str,
+        agent_functions: List[Dict],
+        agent_action_group_name: str,
+        agent_action_group_description: str = None
+    ) -> None:
         """Adds a return of control (ROD) action group to an existing agent, 
         and prepares the agent so it is ready to be invoked.
 
@@ -739,21 +789,20 @@ class AgentsForAmazonBedrock:
             agent_action_group_name (str): name of the agent action group
             agent_action_group_description (str, Optional): description of the agent action group
         """
-           
         _agent_action_group_resp = self._bedrock_agent_client.create_agent_action_group(
-                agentId=agent_id,
-                agentVersion='DRAFT',
-                actionGroupExecutor={'customControl': 'RETURN_CONTROL'},
-                actionGroupName=agent_action_group_name,
-                functionSchema={'functions': agent_functions},
-                description=agent_action_group_description
-                )
+            agentId=agent_id,
+            agentVersion='DRAFT',
+            actionGroupExecutor={'customControl': 'RETURN_CONTROL'},
+            actionGroupName=agent_action_group_name,
+            functionSchema={'functions': agent_functions},
+            description=agent_action_group_description
+        )
         _resp = self._bedrock_agent_client.prepare_agent(
                agentId=agent_id
             )
         time.sleep(5) # make sure agent is ready to be invoked as soon as we return
         return
-    
+
     def get_function_defs(self, agent_name: str) -> List[dict]:
         """Returns the function definitions for an agent.
 
@@ -777,11 +826,14 @@ class AgentsForAmazonBedrock:
                                                                          agentVersion="DRAFT")
         return _get_ag_resp['agentActionGroup']['functionSchema']
 
-    def create_supervisor_agent(self, supervisor_agent_name: str, 
-                      sub_agent_names: List[str], 
-                      model_ids: List[str],
-                      kb_arn: str=None,
-                      kb_descr: str=None) -> tuple[List[dict], str]:
+    def create_supervisor_agent(
+        self,
+        supervisor_agent_name: str,
+        sub_agent_names: List[str],
+        model_ids: List[str],
+        kb_arn: str = None,
+        kb_descr: str = None
+    ) -> tuple[List[dict], str]:
         """Creates a supervisor agent that takes in user input and delegates the work to one of its
         available sub-agents. For each sub-agent, the supervisor agent has a distinct action in its action group.
         A supervisor Lambda function implements the pass-through logic to invoke the chosen sub-agent.
@@ -818,7 +870,9 @@ class AgentsForAmazonBedrock:
 
         for _agent_name in sub_agent_names:
             _agent_id = self.get_agent_id_by_name(_agent_name)
-            _agent_details = self._bedrock_agent_client.get_agent(agentId = _agent_id)['agent']
+            _agent_details = self._bedrock_agent_client.get_agent(
+                agentId=_agent_id
+            )['agent']
             _sub_agent_arns.append(_agent_details['agentArn'])
             if 'description' in _agent_details:
                 _descr = _agent_details['description']
@@ -869,26 +923,30 @@ class AgentsForAmazonBedrock:
             self.associate_kb_with_agent(_supervisor_agent_id, kb_descr, _kb_id)
 
         time.sleep(5) # make sure agent is ready to be invoked as soon as we return
-        
+
         # Add an action group to the supervisor agent, with a single action that invokes the selected sub-agent
-        self.add_action_group_with_lambda( supervisor_agent_name,
-                                     f'{supervisor_agent_name}_lambda',
-                                     "supervisor_agent_function.py",
-                                     _function_defs,
-                                     "sub-agents-ag",
-                                     "set of actions that invoke sub-agents",
-                                     _sub_agent_arns)
+        self.add_action_group_with_lambda(
+            supervisor_agent_name,
+            f'{supervisor_agent_name}_lambda',
+            "supervisor_agent_function.py",
+            _function_defs,
+            "sub-agents-ag",
+            "set of actions that invoke sub-agents",
+            _sub_agent_arns
+        )
 
         return _function_defs, _supervisor_agent_arn
-    
-    def invoke(self,
-                input_text: str, 
-                agent_id: str, 
-                agent_alias_id: str="TSTALIASID", 
-                session_id: str=str(uuid.uuid1()), 
-                session_state: dict={},
-                enable_trace: bool=False, 
-                end_session: bool=False):
+
+    def invoke(
+        self,
+        input_text: str,
+        agent_id: str,
+        agent_alias_id: str = "TSTALIASID",
+        session_id: str = str(uuid.uuid1()),
+        session_state: dict = {},
+        enable_trace: bool = False,
+        end_session: bool = False
+    ):
         """Invokes an agent with a given input text, while optional parameters
         also let you leverage an agent session, or target a specific agent alias.
 
@@ -907,19 +965,36 @@ class AgentsForAmazonBedrock:
         _agent_resp = self._bedrock_agent_runtime_client.invoke_agent(
             inputText=input_text,
             agentId=agent_id,
-            agentAliasId=agent_alias_id, 
+            agentAliasId=agent_alias_id,
             sessionId=session_id,
             sessionState=session_state,
-            enableTrace=enable_trace, 
-            endSession= end_session
+            enableTrace=enable_trace,
+            endSession=end_session
         )
         # logger.info(pprint.pprint(agentResponse))
-    
+
         _agent_answer = ""
         _event_stream = _agent_resp['completion']
         try:
-            for _event in _event_stream:        
-                if 'chunk' in _event:
+            for _event in _event_stream:
+                if 'files' in _event:
+                    _files_event = _event['files']
+                    display(Markdown("### Files"))
+                    _files_list = _files_event['files']
+                    for _this_file in _files_list:
+                        print(f"{_this_file['name']} ({_this_file['type']})")
+                        _file_bytes = _this_file['bytes']
+                        # save bytes to file, given the name of file and the bytes 
+                        if not os.path.exists('output'):
+                            os.makedirs('output')
+                        _file_name = os.path.join('output', _this_file['name'])
+                        with open(_file_name, 'wb') as f:
+                            f.write(_file_bytes)
+                        if _this_file['type'] == 'image/png' or _this_file['type'] == 'image/jpeg':
+                            _img = mpimg.imread(_file_name)
+                            plt.imshow(_img)
+                            plt.show()
+                elif 'chunk' in _event:
                     _data = _event['chunk']['bytes']
                     _agent_answer = _data.decode('utf8')
 
@@ -964,7 +1039,6 @@ class AgentsForAmazonBedrock:
                             if _curr_citation_idx == 0:
                                 _answer_prefix = _cleaned_text[:_start]
                                 _fully_cited_answer = _answer_prefix + _fully_cited_answer
-                            
                             _curr_citation_idx += 1
 
                             if enable_trace:
@@ -981,23 +1055,25 @@ class AgentsForAmazonBedrock:
                             print(f"\nfullly cited answer:*************\n{_fullly_cited_answer}\n*************")
                 elif 'trace' in _event and enable_trace:
                     print(json.dumps(_event['trace'], indent=2))
-                elif 'preGuardrailTrace' in _event and enable_trace:
-                    print(json.dumps(_event['preGuardrailTrace'], indent=2))
+                #elif 'preGuardrailTrace' in _event and enable_trace:
+                #    print(json.dumps(_event['preGuardrailTrace'], indent=2))
                 else:
                     raise Exception("unexpected event.", _event)
             return _agent_answer
         except Exception as e:
             raise Exception("unexpected event.", e)
-        
-    def simple_agent_invoke_roc(self,
-                            input_text: str, 
-                            agent_id: str, 
-                            agent_alias_id: str=DEFAULT_ALIAS, 
-                            session_id: str=str(uuid.uuid1()), 
-                            function_call: str=None,
-                            function_call_result: str=None,
-                            enable_trace: bool=False, 
-                            end_session: bool=False):
+
+    def simple_agent_invoke_roc(
+        self,
+        input_text: str,
+        agent_id: str,
+        agent_alias_id: str = DEFAULT_ALIAS,
+        session_id: str = str(uuid.uuid1()),
+        function_call: str = None,
+        function_call_result: str = None,
+        enable_trace: bool = False,
+        end_session: bool = False
+    ):
         """Performs an invoke_agent() call for an agent with an ROC action group. Also used
         for subsequent processing of the function call result from a prior ROC agent call.
  
@@ -1037,18 +1113,18 @@ class AgentsForAmazonBedrock:
             _agent_resp = self._bedrock_agent_runtime_client.invoke_agent(
                 inputText=input_text,
                 agentId=agent_id,
-                agentAliasId=agent_alias_id, 
+                agentAliasId=agent_alias_id,
                 sessionId=session_id,
-                enableTrace=enable_trace, 
-                endSession= end_session
+                enableTrace=enable_trace,
+                endSession=end_session
             )
 
         # logger.info(pprint.pprint(agentResponse))
-    
+
         _agent_answer = ""
         _event_stream = _agent_resp['completion']
         try:
-            for _event in _event_stream:        
+            for _event in _event_stream:
                 if 'chunk' in _event:
                     _data = _event['chunk']['bytes']
                     _agent_answer = _data.decode('utf8')
@@ -1063,12 +1139,14 @@ class AgentsForAmazonBedrock:
             return _agent_answer
         except Exception as e:
             raise Exception("unexpected event.", e)
-        
-    def update_agent(self,
-                     agent_name: str,
-                     new_model_id: str=None,
-                     new_instructions: str=None,
-                     guardrail_id: str=None):
+
+    def update_agent(
+        self,
+        agent_name: str,
+        new_model_id: str = None,
+        new_instructions: str = None,
+        guardrail_id: str = None
+    ):
         """Updates an agent with new details.
 
         Args:
@@ -1098,8 +1176,10 @@ class AgentsForAmazonBedrock:
 
         # Update guardrail or if there was none, this will add it.
         if guardrail_id is not None:
-            _agent_details['guardrailConfiguration'] = {"guardrailIdentifier": guardrail_id,
-                                                        "guardrailVersion": "DRAFT"}
+            _agent_details['guardrailConfiguration'] = {
+                "guardrailIdentifier": guardrail_id,
+                "guardrailVersion": "DRAFT"
+            }
         else:
             # if the guardrail configuration is present, remove it from agent details since
             # the caller wants to remove the association
@@ -1111,25 +1191,27 @@ class AgentsForAmazonBedrock:
         _filteredPromptOverrideConfigsList = list(filter(lambda x: (x['promptCreationMode'] == "OVERRIDDEN"), 
                                                          _promptOverrideConfigsList))
         _agent_details['promptOverrideConfiguration']['promptConfigurations'] = _filteredPromptOverrideConfigsList
-        
+
         # Remove the fields that are not necessary for UpdateAgent API
         for key_to_remove in ['clientToken', 'createdAt', 'updatedAt', 'preparedAt', 'agentStatus', 'agentArn']:
             if key_to_remove in _agent_details:
                 del(_agent_details[key_to_remove])
-        
+
         # Update the agent.
         _update_agent_response = self._bedrock_agent_client.update_agent(**_agent_details)
 
         time.sleep(3)
-        
-        #Prepare Agent
+
+        # Prepare Agent
         self._bedrock_agent_client.prepare_agent(agentId=_agent_id)
 
         return _update_agent_response
 
-    def associate_agents(self,
-                         supervisor_agent_id: str,
-                         subagents_list: List):
+    def associate_agents(
+        self,
+        supervisor_agent_id: str,
+        subagents_list: List
+    ):
         """Associate a sub-agent with a collaborator one
 
         Args:
@@ -1157,11 +1239,11 @@ class AgentsForAmazonBedrock:
             response.append(association_response)
             self.wait_agent_status_update(supervisor_agent_id)
 
-        #Prepare Agent
+        # Prepare Agent
         self._bedrock_agent_client.prepare_agent(agentId=supervisor_agent_id)
-        
+
         return response
-    
+
     def wait_agent_status_update(self, agent_id):
         response = self._bedrock_agent_client.get_agent(agentId=agent_id)
         agent_status = response['agent']['agentStatus']
@@ -1174,7 +1256,7 @@ class AgentsForAmazonBedrock:
             except self._bedrock_agent_client.exceptions.ResourceNotFoundException:
                 agent_status = 'DELETED'
         print(f'Agent id {agent_id} current status: {agent_status}')
-        
+
     def create_dynamodb(self, table_name, pk_item, sk_item):
         try:
             table = self._dynamodb_resource.create_table(
@@ -1209,9 +1291,11 @@ class AgentsForAmazonBedrock:
         except self._dynamodb_client.exceptions.ResourceInUseException:
             print(f'Table {table_name} already exists, skipping table creation step')
 
-    def load_dynamodb(self, 
-                      table_name: str, 
-                      items: List):
+    def load_dynamodb(
+        self,
+        table_name: str,
+        items: List
+    ):
         try:
 
             table = self._dynamodb_resource.Table(table_name)
@@ -1220,12 +1304,14 @@ class AgentsForAmazonBedrock:
         except self._dynamodb_client.exceptions.ResourceInUseException:
             print(f'Error on loading process for table: {table_name}.')
 
-    def query_dynamodb(self, 
-                      table_name: str, 
-                      pk_field: str,
-                      pk_value: str,
-                      sk_field: str=None, 
-                      sk_value: str=None):
+    def query_dynamodb(
+        self,
+        table_name: str,
+        pk_field: str,
+        pk_value: str,
+        sk_field: str = None,
+        sk_value: str = None
+    ):
         try:
 
             table = self._dynamodb_resource.Table(table_name)
