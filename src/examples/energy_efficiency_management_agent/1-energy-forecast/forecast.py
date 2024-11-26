@@ -28,13 +28,15 @@ def put_dynamodb(table_name, item):
     resp = table.put_item(Item=item)
     return resp
 
-def read_dynamodb(table_name: str, 
-                   pk_field: str,
-                   pk_value: str,
-                   sk_field: str=None, 
-                   sk_value: str=None,
-                   attr_key: str=None,
-                   attr_val: str=None,):
+def read_dynamodb(
+    table_name: str, 
+    pk_field: str,
+    pk_value: str,
+    sk_field: str=None, 
+    sk_value: str=None,
+    attr_key: str=None,
+    attr_val: str=None
+):
     try:
 
         table = dynamodb_resource.Table(table_name)
