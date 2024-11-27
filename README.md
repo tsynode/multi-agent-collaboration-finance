@@ -1,19 +1,18 @@
-# Amazon Bedrock Multi-Agent Collaboration
-
+<h2 align="center">Amazon Bedrock Multi-Agent Collaboration&nbsp;</h2>
 :wave: :wave: Welcome to the Amazon Bedrock Multi-Agent Collaboration repository. :wave: :wave:
 
 This repository provides examples and best practices for working with [Amazon Bedrock Multi-Agent Collaboration](https://aws.amazon.com/bedrock/agents/). 
 
 🔄 **Actively Maintained**: This repository is regularly updated to include the latest Amazon Bedrock Agent features and functionalities.🔄
 
-Amazon Bedrock multi-agent collaboration enables unfied conversational experiences as well as new ways to deliver complex process automation. Companies now have a modular, secure, and scalable way to leverage a collection of specialized AI agents to adress more complicated scenarios. Development teams can independently build AI agents with deep expertise at a very specific set of outcomes, and these agents can be flexibly assembled into a multi-agent nsystem to execute a set of tasks. Supervisor agents dynamically plan and execute across their available collaborators and knowledge bases, completing complex requests. This addresses the scalability challenges of single-agent systems by allowing greater accuracy without the complexity associated with more complicated coding and prompt engineering. Multi-level agent hierarchies are also supported, and agent processing can be both sequential and parallel. Bedrock agent tracing gives you the transparency needed for auditing and troubleshooting multi-agent flows by giving step by step information about the chain of agent calls, and the inputs and outputs to every sub-agent and tool along the way.
+![architecture](https://raw.githubusercontent.com/aws-samples/bedrock-multi-agents-collaboration-workshop/main/img/architecture.gif?raw=true)
 
 ## �� Table of Contents ��
 
 - [Overview](#overview)
-- [Prerequisites](#prerequisites)
 - [Repository Structure](#repository-structure)
 - [Multi-Agent Examples](#multi-agent-examples)
+- [Demo](#demo)
 - [Getting Started](#getting-started)
 - [Security](#Security)
 - [License](#license)
@@ -26,28 +25,9 @@ This repository provides practical examples to help you understand and implement
 
 The solutions presented here use the [boto3 SDK in Python](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/bedrock-agent.html), however, you can create Bedrock Agents solutions using any of the AWS SDKs for [C++](https://sdk.amazonaws.com/cpp/api/LATEST/aws-cpp-sdk-bedrock-agent/html/annotated.html), [Go](https://docs.aws.amazon.com/sdk-for-go/api/service/bedrockagent/), [Java](https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/bedrockagent/package-summary.html), [JavaScript](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/bedrock-agent/), [Kotlin](https://sdk.amazonaws.com/kotlin/api/latest/bedrockagent/index.html), [.NET](https://docs.aws.amazon.com/sdkfornet/v3/apidocs/items/BedrockAgent/NBedrockAgent.html), [PHP](https://docs.aws.amazon.com/aws-sdk-php/v3/api/namespace-Aws.BedrockAgent.html), [Ruby](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/BedrockAgent.html), [Rust](https://docs.rs/aws-sdk-bedrockagent/latest/aws_sdk_bedrockagent/), [SAP ABAP](https://docs.aws.amazon.com/sdk-for-sap-abap/v1/api/latest/bdr/index.html) or [Swift](https://sdk.amazonaws.com/swift/api/awsbedrockruntime/0.34.0/documentation/awsbedrockruntime)
 
-## Prerequisites
+## Demo
 
-- AWS Account with Bedrock access
-- Python 3.8 or later
-- Required Python packages (specified in [`requirements.txt`](/requirements.txt))
-
-Make sure to run the following commands:
-
-```
-git clone https://github.com/aws-samples/bedrock-multi-agents-collaboration-workshop
-
-cd bedrock-multi-agents-collaboration-workshop
-
-python3 -m venv .venv
-
-source .venv/bin/activate
-
-pip3 install -r requirements.txt
-```
-
-> [!TIP]   
-> Run the `deactivate` command to deactivate the virtual environment.
+![demo](https://raw.githubusercontent.com/aws-samples/bedrock-multi-agents-collaboration-workshop/main/img/demo.gif?raw=true)
 
 ## Repository Structure
 
@@ -72,22 +52,20 @@ pip3 install -r requirements.txt
 
 Shows examples of bedrock multi-agent collaboration including:
 
-- 00_hello_world_agent
-- DevOps Agent
-- Energy Efficiency Management Agent
-- Portfolio Assistant Agent
-- Startup Advisor Agent
-- Team Poems Agent
-- Trip Planner Agent
-- Voyage Virtuso Agent
+- [00_hello_world_agent](/src/examples/00_hello_world_agent/)
+- [DevOps Agent](/src/examples/devops_agent/)
+- [Energy Efficiency Management Agent](/src/examples/energy_efficiency_management_agent/)
+- [Portfolio Assistant Agent](/src/examples/portfolio_assistant_agent/)
+- [Startup Advisor Agent](/src/examples/startup_advisor_agent/)
+- [Team Poems Agent](/src/examples/team_poems_agent/)
+- [Trip Planner Agent](/src/examples/trip_planner_agent/)
+- [Voyage Virtuso Agent](/src/examples/voyage_virtuoso_agent/)
 
 ## Getting Started
 
-> [!IMPORTANT]
-> Make sure you have completed the [Prerequisites](#prerequisites).
-
-1. To get started navigate to the example you want to deploy in `src/examples/*` directory. 
-2. Follow the deployment steps in the `src/examples/*/README.md` file of the example. 
+1. Navigate to [`src/`](/src/) for more details.
+2. To get started navigate to the example you want to deploy in [`src/examples/*`](/src/examples/) directory. 
+3. Follow the deployment steps in the `src/examples/*/README.md` file of the example. 
 
 ## Best Practices
 
