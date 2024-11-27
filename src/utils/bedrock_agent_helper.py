@@ -295,7 +295,9 @@ class AgentsForAmazonBedrock:
                         "Action": [
                             "dynamodb:GetItem",
                             "dynamodb:PutItem",
-                            "dynamodb:DeleteItem"
+                            "dynamodb:DeleteItem",
+                            "dynamodb:Query",
+                            "dynamodb:UpdateItem"
                         ],
                         "Resource": "arn:aws:dynamodb:{}:{}:table/{}".format(
                             self._region, self._account_id, dynamodb_table_name
@@ -393,6 +395,7 @@ class AgentsForAmazonBedrock:
             description (str): Description of the KB
             kb_id (str): Id of the KB
         """
+        self.wait_agent_status_update(agent_id)
         _resp = self._bedrock_agent_client.associate_agent_knowledge_base(
             agentId=agent_id,
             agentVersion="DRAFT",
@@ -941,7 +944,7 @@ class AgentsForAmazonBedrock:
             )
 
         return _sub_agent_list
-        
+
     def create_agent(
         self,
         agent_name: str,
