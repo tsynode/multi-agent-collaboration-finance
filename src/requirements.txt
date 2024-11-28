@@ -1,5 +1,0 @@
-pandas
-termcolor
-rich
-pydantic
-black
