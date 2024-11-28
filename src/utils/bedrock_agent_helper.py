@@ -553,7 +553,10 @@ class AgentsForAmazonBedrock:
         return _lambda_function["FunctionArn"]
 
     def delete_lambda(
-            self, lambda_function_name: str, delete_role_flag: bool = True
+        self, 
+        lambda_function_name: str, 
+        delete_role_flag: bool = True,
+        dynamoDB_table: str = None
     ) -> None:
         """Deletes the specified Lambda function.
         Optionally, deletes the IAM role that was created for the Lambda function.
@@ -588,6 +591,16 @@ class AgentsForAmazonBedrock:
             )
         except:
             pass
+        
+        # Delete DynamoDB Table
+        if dynamoDB_table:
+            try:
+                self._dynamodb_client.delete_table(
+                    TableName=dynamoDB_table
+                )
+            except Exception as e:
+                #logger.warning(f"Ignored exception {e}")
+                print(f"Ignored exception {e}")
 
     def get_agent_role(self, agent_name: str) -> str:
         """Gets the ARN of the IAM role that is associated with the specified Agent.
@@ -1541,10 +1554,13 @@ class AgentsForAmazonBedrock:
                         if 'callerChain' in _event['trace']:
                             if len(_event['trace']['callerChain']) > 1:
                                 _sub_agent_alias_arn = _event['trace']['callerChain'][1]['agentAliasArn']
-                                # get sub agent id by grabbing all text following the first '/' character
+                                # get sub agent id by grabbing all text following the second '/' character
                                 _sub_agent_alias_id = _sub_agent_alias_arn.split('/', 1)[1]
-                                _sub_agent_name = multi_agent_names[_sub_agent_alias_id]
-                                # _sub_agent_name = "<not-yet-provided>"
+                                try:
+                                    _sub_agent_name = multi_agent_names[_sub_agent_alias_id]
+                                except:
+                                    print("You haven't provided agents names. To do so provide a dictionary in the format {f'{agent_id}/{agent_alias_id}': f'{agent_name}'})")
+                                    _sub_agent_name = "<not-yet-provided>"
 
                         # if 'collaboratorName' in _event['trace']:
                         #     _sub_agent_name = _event['trace']['collaboratorName'] 
@@ -1559,7 +1575,7 @@ class AgentsForAmazonBedrock:
                             print(colored(f"---- Step {_orch_step} ----", "green"))
                             _time_before_routing = datetime.datetime.now()
                             print(colored("Classifying request to immediately route to one collaborator if possible.", "blue"))
-                                
+
                         if 'modelInvocationOutput' in _route:
                             _llm_usage = _route['modelInvocationOutput']['metadata']['usage']
                             _in_tokens = _llm_usage['inputTokens']
@@ -1965,3 +1981,5 @@ class AgentsForAmazonBedrock:
             return query_data['Items']
         except self._dynamodb_client.exceptions.ResourceInUseException:
             print(f'Error querying table: {table_name}.')
+
+        
