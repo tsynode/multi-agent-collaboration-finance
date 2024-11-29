@@ -27,7 +27,6 @@ Here is a summary of the most important methods:
 
 - create_agent: Creates a new Agent.
 - add_action_group_with_lambda: Creates a new Action Group for an Agent, backed by Lambda.
-- simple_invoke_agent: Invokes an Agent with a given input.
 """
 
 import boto3
