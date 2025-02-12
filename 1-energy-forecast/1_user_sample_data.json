@@ -1,40 +1,45 @@
-{"customer_id": "1", "day": "2024/06/01", "sumPowerReading": "120.0", "kind":"measured"}
-{"customer_id": "1", "day": "2024/07/01", "sumPowerReading": "130.0", "kind":"measured"}
-{"customer_id": "1", "day": "2024/08/01", "sumPowerReading": "140.0", "kind":"measured"}
-{"customer_id": "1", "day": "2024/09/01", "sumPowerReading": "150.0", "kind":"measured"}
-{"customer_id": "1", "day": "2024/10/01", "sumPowerReading": "200.0", "kind":"measured"}
-{"customer_id": "1", "day": "2024/11/01", "sumPowerReading": "170.0", "kind":"forecasted"}
-{"customer_id": "1", "day": "2024/12/01", "sumPowerReading": "175.0", "kind":"forecasted"}
-{"customer_id": "1", "day": "2025/01/01", "sumPowerReading": "182.0", "kind":"forecasted"}
-{"customer_id": "2", "day": "2024/06/01", "sumPowerReading": "80.0", "kind":"measured"}
-{"customer_id": "2", "day": "2024/07/01", "sumPowerReading": "70.0", "kind":"measured"}
-{"customer_id": "2", "day": "2024/08/01", "sumPowerReading": "120.0", "kind":"measured"}
-{"customer_id": "2", "day": "2024/09/01", "sumPowerReading": "70.0", "kind":"measured"}
-{"customer_id": "2", "day": "2024/10/01", "sumPowerReading": "65.0", "kind":"measured"}
-{"customer_id": "2", "day": "2024/11/01", "sumPowerReading": "68.0", "kind":"forecasted"}
-{"customer_id": "2", "day": "2024/12/01", "sumPowerReading": "75.0", "kind":"forecasted"}
-{"customer_id": "2", "day": "2025/01/01", "sumPowerReading": "65.0", "kind":"forecasted"}
-{"customer_id": "3", "day": "2024/06/01", "sumPowerReading": "80.0", "kind":"measured"}
-{"customer_id": "3", "day": "2024/07/01", "sumPowerReading": "70.0", "kind":"measured"}
-{"customer_id": "3", "day": "2024/08/01", "sumPowerReading": "120.0", "kind":"measured"}
-{"customer_id": "3", "day": "2024/09/01", "sumPowerReading": "70.0", "kind":"measured"}
-{"customer_id": "3", "day": "2024/10/01", "sumPowerReading": "65.0", "kind":"measured"}
-{"customer_id": "3", "day": "2024/11/01", "sumPowerReading": "78.0", "kind":"forecasted"}
-{"customer_id": "3", "day": "2024/12/01", "sumPowerReading": "92.0", "kind":"forecasted"}
-{"customer_id": "3", "day": "2025/01/01", "sumPowerReading": "88.0", "kind":"forecasted"}
-{"customer_id": "4", "day": "2024/06/01", "sumPowerReading": "80.0", "kind":"measured"}
-{"customer_id": "4", "day": "2024/07/01", "sumPowerReading": "70.0", "kind":"measured"}
-{"customer_id": "4", "day": "2024/08/01", "sumPowerReading": "120.0", "kind":"measured"}
-{"customer_id": "4", "day": "2024/09/01", "sumPowerReading": "70.0", "kind":"measured"}
-{"customer_id": "4", "day": "2024/10/01", "sumPowerReading": "65.0", "kind":"measured"}
-{"customer_id": "4", "day": "2024/11/01", "sumPowerReading": "62.0", "kind":"forecasted"}
-{"customer_id": "4", "day": "2024/12/01", "sumPowerReading": "75.0", "kind":"forecasted"}
-{"customer_id": "4", "day": "2025/01/01", "sumPowerReading": "83.0", "kind":"forecasted"}
-{"customer_id": "5", "day": "2024/06/01", "sumPowerReading": "40.0", "kind":"measured"}
-{"customer_id": "5", "day": "2024/07/01", "sumPowerReading": "30.0", "kind":"measured"}
-{"customer_id": "5", "day": "2024/08/01", "sumPowerReading": "40.0", "kind":"measured"}
-{"customer_id": "5", "day": "2024/09/01", "sumPowerReading": "20.0", "kind":"measured"}
-{"customer_id": "5", "day": "2024/10/01", "sumPowerReading": "50.0", "kind":"measured"}
-{"customer_id": "5", "day": "2024/11/01", "sumPowerReading": "33.0", "kind":"forecasted"}
-{"customer_id": "5", "day": "2024/12/01", "sumPowerReading": "22.0", "kind":"forecasted"}
-{"customer_id": "5", "day": "2025/01/01", "sumPowerReading": "28.0", "kind":"forecasted"}
+{"customer_id": "1", "day": "2025/02/01", "sumPowerReading": "154", "kind": "measured"}
+{"customer_id": "1", "day": "2025/01/01", "sumPowerReading": "134", "kind": "measured"}
+{"customer_id": "1", "day": "2025/03/01", "sumPowerReading": "160", "kind": "forecasted"}
+{"customer_id": "1", "day": "2024/12/01", "sumPowerReading": "156", "kind": "measured"}
+{"customer_id": "1", "day": "2025/04/01", "sumPowerReading": "108", "kind": "forecasted"}
+{"customer_id": "1", "day": "2024/11/01", "sumPowerReading": "132", "kind": "measured"}
+{"customer_id": "1", "day": "2025/05/01", "sumPowerReading": "132", "kind": "forecasted"}
+{"customer_id": "1", "day": "2024/10/01", "sumPowerReading": "190", "kind": "measured"}
+{"customer_id": "1", "day": "2025/06/01", "sumPowerReading": "128", "kind": "forecasted"}
+{"customer_id": "2", "day": "2025/02/01", "sumPowerReading": "110", "kind": "measured"}
+{"customer_id": "2", "day": "2025/01/01", "sumPowerReading": "138", "kind": "measured"}
+{"customer_id": "2", "day": "2025/03/01", "sumPowerReading": "126", "kind": "forecasted"}
+{"customer_id": "2", "day": "2024/12/01", "sumPowerReading": "136", "kind": "measured"}
+{"customer_id": "2", "day": "2025/04/01", "sumPowerReading": "160", "kind": "forecasted"}
+{"customer_id": "2", "day": "2024/11/01", "sumPowerReading": "100", "kind": "measured"}
+{"customer_id": "2", "day": "2025/05/01", "sumPowerReading": "170", "kind": "forecasted"}
+{"customer_id": "2", "day": "2024/10/01", "sumPowerReading": "118", "kind": "measured"}
+{"customer_id": "2", "day": "2025/06/01", "sumPowerReading": "192", "kind": "forecasted"}
+{"customer_id": "3", "day": "2025/02/01", "sumPowerReading": "166", "kind": "measured"}
+{"customer_id": "3", "day": "2025/01/01", "sumPowerReading": "154", "kind": "measured"}
+{"customer_id": "3", "day": "2025/03/01", "sumPowerReading": "152", "kind": "forecasted"}
+{"customer_id": "3", "day": "2024/12/01", "sumPowerReading": "116", "kind": "measured"}
+{"customer_id": "3", "day": "2025/04/01", "sumPowerReading": "152", "kind": "forecasted"}
+{"customer_id": "3", "day": "2024/11/01", "sumPowerReading": "148", "kind": "measured"}
+{"customer_id": "3", "day": "2025/05/01", "sumPowerReading": "120", "kind": "forecasted"}
+{"customer_id": "3", "day": "2024/10/01", "sumPowerReading": "188", "kind": "measured"}
+{"customer_id": "3", "day": "2025/06/01", "sumPowerReading": "124", "kind": "forecasted"}
+{"customer_id": "4", "day": "2025/02/01", "sumPowerReading": "128", "kind": "measured"}
+{"customer_id": "4", "day": "2025/01/01", "sumPowerReading": "192", "kind": "measured"}
+{"customer_id": "4", "day": "2025/03/01", "sumPowerReading": "150", "kind": "forecasted"}
+{"customer_id": "4", "day": "2024/12/01", "sumPowerReading": "120", "kind": "measured"}
+{"customer_id": "4", "day": "2025/04/01", "sumPowerReading": "162", "kind": "forecasted"}
+{"customer_id": "4", "day": "2024/11/01", "sumPowerReading": "114", "kind": "measured"}
+{"customer_id": "4", "day": "2025/05/01", "sumPowerReading": "112", "kind": "forecasted"}
+{"customer_id": "4", "day": "2024/10/01", "sumPowerReading": "162", "kind": "measured"}
+{"customer_id": "4", "day": "2025/06/01", "sumPowerReading": "138", "kind": "forecasted"}
+{"customer_id": "5", "day": "2025/02/01", "sumPowerReading": "104", "kind": "measured"}
+{"customer_id": "5", "day": "2025/01/01", "sumPowerReading": "140", "kind": "measured"}
+{"customer_id": "5", "day": "2025/03/01", "sumPowerReading": "196", "kind": "forecasted"}
+{"customer_id": "5", "day": "2024/12/01", "sumPowerReading": "168", "kind": "measured"}
+{"customer_id": "5", "day": "2025/04/01", "sumPowerReading": "130", "kind": "forecasted"}
+{"customer_id": "5", "day": "2024/11/01", "sumPowerReading": "146", "kind": "measured"}
+{"customer_id": "5", "day": "2025/05/01", "sumPowerReading": "134", "kind": "forecasted"}
+{"customer_id": "5", "day": "2024/10/01", "sumPowerReading": "184", "kind": "measured"}
+{"customer_id": "5", "day": "2025/06/01", "sumPowerReading": "140", "kind": "forecasted"}
