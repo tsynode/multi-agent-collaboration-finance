@@ -37,6 +37,8 @@ import zipfile
 from dateutil.tz import tzutc
 import os
 import datetime
+from dateutil.relativedelta import relativedelta
+import random
 from io import BytesIO
 from typing import List, Dict, Tuple
 import re
@@ -1980,5 +1982,37 @@ class AgentsForAmazonBedrock:
             return query_data['Items']
         except self._dynamodb_client.exceptions.ResourceInUseException:
             print(f'Error querying table: {table_name}.')
+
+    def fill_template(self, customer, day, power, kind):
+        line_template = {"customer_id": "null", "day": "", "sumPowerReading": "null", "kind":"null"}
+        line_template["customer_id"] = str(customer)
+        line_template["day"] = day
+        line_template["sumPowerReading"] = str(power)
+        line_template["kind"] = kind
+        return line_template
+
+
+    def generate_fake_data_dynamodb(self):
+        cur_date = datetime.datetime.now()
+        formated_cur_date = f"{cur_date.year}/{cur_date.month:02d}/01"
+        output = ""
+
+        for customer in range(1,6):
+            current = self.fill_template(customer, formated_cur_date, random.randrange(100, 201, 2), 'measured')
+            output += json.dumps(current) + '\n'
+            for measure in range(1,5):
+                last_month = cur_date - relativedelta(months=measure)
+                formated_last_m = f"{last_month.year}/{last_month.month:02d}/01"
+                future_month = cur_date + relativedelta(months=measure)
+                formated_next_m = f"{future_month.year}/{future_month.month:02d}/01"
+                past = self.fill_template(customer, formated_last_m, random.randrange(100, 201, 2), 'measured')
+                future = self.fill_template(customer, formated_next_m, random.randrange(100, 201, 2), 'forecasted')
+                output += json.dumps(past) + '\n'
+                output += json.dumps(future) + '\n'
+
+        with open("1_user_sample_data.json", "w") as f:
+            f.write(output)
+
+
 
         
