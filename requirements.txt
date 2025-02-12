@@ -6,3 +6,4 @@ retrying
 termcolor
 rich
 events
+matplotlib
