@@ -224,7 +224,7 @@ class AgentsForAmazonBedrock:
                 ]
             }
 
-            _assume_role_policy_document_json = json.dumps(_assume_role_policy_document)
+            _assume_role_policy_document_json = json.dumps(_assume_role_policy_document, ensure_ascii=False)
 
             _lambda_iam_role = self._iam_client.create_role(
                 RoleName=_lambda_function_role_name,
@@ -279,7 +279,7 @@ class AgentsForAmazonBedrock:
                 ]
             }
             # Attach the inline policy to the Lambda function's role
-            sub_agent_policy_json = json.dumps(_sub_agent_policy_document)
+            sub_agent_policy_json = json.dumps(_sub_agent_policy_document, ensure_ascii=False)
             self._iam_client.put_role_policy(
                 PolicyDocument=sub_agent_policy_json,
                 PolicyName="sub_agent_policy",
@@ -308,7 +308,7 @@ class AgentsForAmazonBedrock:
             }
 
             # Attach the inline policy to the Lambda function's role
-            _dynamodb_access_policy_json = json.dumps(_dynamodb_access_policy)
+            _dynamodb_access_policy_json = json.dumps(_dynamodb_access_policy, ensure_ascii=False)
             self._iam_client.put_role_policy(
                 PolicyDocument=_dynamodb_access_policy_json,
                 PolicyName=_dynamodb_access_policy_name,
@@ -1589,8 +1589,7 @@ class AgentsForAmazonBedrock:
                             _route_duration = datetime.datetime.now() - _time_before_routing
 
                             _raw_resp_str = _route['modelInvocationOutput']['rawResponse']['content']
-                            _raw_resp = json.loads(_raw_resp_str)
-                            _classification = _raw_resp['content'][0]['text'].replace('<a>', '').replace('</a>', '')
+                            _classification = _raw_resp_str.replace('<a>', '').replace('</a>', '')
 
                             if _classification == UNDECIDABLE_CLASSIFICATION:
                                 print(colored(f"Routing classifier did not find a matching collaborator. Reverting to 'SUPERVISOR' mode.", "magenta"))
@@ -1733,7 +1732,7 @@ class AgentsForAmazonBedrock:
                             print(colored(f'Used LLM tokens, in: {_in_tokens}, out: {_out_tokens}', "yellow"))
 
                     if trace_level == "all":
-                        print(json.dumps(_event['trace'], indent=2))
+                        print(json.dumps(_event['trace'], indent=2, ensure_ascii=False))
 
                 if 'files' in _event.keys() and enable_trace:
                     console = Console()
@@ -1844,7 +1843,7 @@ class AgentsForAmazonBedrock:
                 elif 'returnControl' in _event:
                     _agent_answer = _event['returnControl']
                 elif 'trace' in _event:
-                    print(json.dumps(_event['trace'], indent=2))
+                    print(json.dumps(_event['trace'], indent=2, ensure_ascii=False))
                 else:
                     raise Exception("unexpected event.", _event)
             return _agent_answer
@@ -1999,7 +1998,7 @@ class AgentsForAmazonBedrock:
 
         for customer in range(1,6):
             current = self.fill_template(customer, formated_cur_date, random.randrange(100, 201, 2), 'measured')
-            output += json.dumps(current) + '\n'
+            output += json.dumps(current, ensure_ascii=False) + '\n'
             for measure in range(1,5):
                 last_month = cur_date - relativedelta(months=measure)
                 formated_last_m = f"{last_month.year}/{last_month.month:02d}/01"
@@ -2007,8 +2006,8 @@ class AgentsForAmazonBedrock:
                 formated_next_m = f"{future_month.year}/{future_month.month:02d}/01"
                 past = self.fill_template(customer, formated_last_m, random.randrange(100, 201, 2), 'measured')
                 future = self.fill_template(customer, formated_next_m, random.randrange(100, 201, 2), 'forecasted')
-                output += json.dumps(past) + '\n'
-                output += json.dumps(future) + '\n'
+                output += json.dumps(past, ensure_ascii=False) + '\n'
+                output += json.dumps(future, ensure_ascii=False) + '\n'
 
         with open("1_user_sample_data.json", "w") as f:
             f.write(output)
