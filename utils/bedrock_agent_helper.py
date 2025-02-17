@@ -224,7 +224,7 @@ class AgentsForAmazonBedrock:
                 ]
             }
 
-            _assume_role_policy_document_json = json.dumps(_assume_role_policy_document, ensure_ascii=False)
+            _assume_role_policy_document_json = json.dumps(_assume_role_policy_document)
 
             _lambda_iam_role = self._iam_client.create_role(
                 RoleName=_lambda_function_role_name,
@@ -279,7 +279,7 @@ class AgentsForAmazonBedrock:
                 ]
             }
             # Attach the inline policy to the Lambda function's role
-            sub_agent_policy_json = json.dumps(_sub_agent_policy_document, ensure_ascii=False)
+            sub_agent_policy_json = json.dumps(_sub_agent_policy_document)
             self._iam_client.put_role_policy(
                 PolicyDocument=sub_agent_policy_json,
                 PolicyName="sub_agent_policy",
@@ -308,7 +308,7 @@ class AgentsForAmazonBedrock:
             }
 
             # Attach the inline policy to the Lambda function's role
-            _dynamodb_access_policy_json = json.dumps(_dynamodb_access_policy, ensure_ascii=False)
+            _dynamodb_access_policy_json = json.dumps(_dynamodb_access_policy)
             self._iam_client.put_role_policy(
                 PolicyDocument=_dynamodb_access_policy_json,
                 PolicyName=_dynamodb_access_policy_name,
