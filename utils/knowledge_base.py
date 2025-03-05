@@ -422,7 +422,55 @@ class BedrockKnowledgeBase:
         return bedrock_kb_execution_role
 
     def create_policies_in_oss(self):
-        role_sm = get_execution_role()
+        # role_sm = get_execution_role()
+        try:
+    # Try to get the SageMaker execution role
+            role_sm = get_execution_role()
+        except :
+            # If running as a user instead of a role, create or use an execution role
+            print("Running as IAM user, creating a SageMaker execution role...")
+            
+            # Create a role name
+            role_name = f"SageMaker-ExecutionRole-{int(time.time())}"
+            
+            # Create the IAM role for SageMaker
+            assume_role_policy_document = {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {"Service": "sagemaker.amazonaws.com"},
+                        "Action": "sts:AssumeRole"
+                    }
+                ]
+            }
+            
+            
+            # Create the role
+            role_response = self.iam_client.create_role(
+                RoleName=role_name,
+                AssumeRolePolicyDocument=json.dumps(assume_role_policy_document),
+                Description="SageMaker execution role created for Bedrock Knowledge Base"
+            )
+            
+            # Attach the required policies
+            self.iam_client.attach_role_policy(
+                RoleName=role_name,
+                PolicyArn="arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+            )
+            
+            # Add additional policies as needed
+            self.iam_client.attach_role_policy(
+                RoleName=role_name,
+                PolicyArn="arn:aws:iam::aws:policy/AmazonS3FullAccess"
+            )
+            
+            # Get the role ARN
+            role_sm = role_response['Role']['Arn']
+            print(f"Created SageMaker execution role: {role_sm}")
+                
+            
+        
         try:
             encryption_policy = self.aoss_client.create_security_policy(
                 name=self.encryption_policy_name,
