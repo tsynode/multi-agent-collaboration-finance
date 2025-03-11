@@ -675,8 +675,6 @@ def play_video_from_bedrock_response(bedrock_response):
         # Get and parse JSON content
         json_response = s3_client.get_object(Bucket=json_bucket, Key=json_key)
         json_data = json.loads(json_response['Body'].read().decode('utf-8'))
-
-        print("json_data. ", json_data)
         
         # Get video location from metadata
         metadata = json_data.get('metadata', {})
