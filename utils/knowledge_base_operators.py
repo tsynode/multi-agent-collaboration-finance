@@ -670,10 +670,13 @@ def play_video_from_bedrock_response(bedrock_response):
         json_path = json_uri.replace('s3://', '')
         json_bucket = json_path.split('/')[0]
         json_key = '/'.join(json_path.split('/')[1:])
-        
+
+
         # Get and parse JSON content
         json_response = s3_client.get_object(Bucket=json_bucket, Key=json_key)
         json_data = json.loads(json_response['Body'].read().decode('utf-8'))
+
+        print("json_data. ", json_data)
         
         # Get video location from metadata
         metadata = json_data.get('metadata', {})
@@ -685,21 +688,24 @@ def play_video_from_bedrock_response(bedrock_response):
             return False
             
         # Get and display video
-        video_response = s3_client.get_object(Bucket=video_bucket, Key=video_key)
-        video_content = video_response['Body'].read()
-        video_base64 = base64.b64encode(video_content).decode()
-        
+        url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': video_bucket, 'Key': video_key},
+            ExpiresIn=3600  # URL valid for 1 hour
+        )
+
         video_player = HTML(f"""
         <video width="800" height="600" controls>
-            <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
+            <source src="{url}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
         """)
+        
         display(video_player)
         return True
         
     except Exception as e:
         print(f"Error: {str(e)}")
         return False
-
+    
 __all__ = ['play_video_from_bedrock_response']
