@@ -16,3 +16,4 @@ agent-old.py
 knowledge_bases-old.py
 *.pptx
 1-energy-forecast/local_helper.ipynb
+.workshop_id
