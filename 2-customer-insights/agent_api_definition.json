@@ -1,0 +1,218 @@
+{
+  "name": "CustomerInsightsAgent",
+  "description": "An agent that explains existing financial visualizations to help bank operators provide better context to customers",
+  "actionGroups": [
+    {
+      "name": "VisualizationExplanation",
+      "description": "Actions for explaining financial visualizations",
+      "actions": [
+        {
+          "name": "explain_visualization",
+          "description": "Explain any financial visualization based on its underlying data",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "visualization_type": {
+                "type": "string",
+                "description": "Type of visualization (spending_trend, investment_allocation, cash_flow, budget_performance)"
+              },
+              "data": {
+                "type": "string",
+                "description": "The data that informed the visualization (JSON format)"
+              },
+              "customer_id": {
+                "type": "string",
+                "description": "Optional customer ID for personalized explanations"
+              },
+              "additional_context": {
+                "type": "string",
+                "description": "Any additional context about the visualization"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"visualization_type\": {\n      \"type\": \"string\",\n      \"description\": \"Type of visualization (spending_trend, investment_allocation, cash_flow, budget_performance)\"\n    },\n    \"data\": {\n      \"type\": \"string\",\n      \"description\": \"The data that informed the visualization (JSON format)\"\n    },\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"Optional customer ID for personalized explanations\"\n    },\n    \"additional_context\": {\n      \"type\": \"string\",\n      \"description\": \"Any additional context about the visualization\"\n    }\n  },\n  \"required\": [\"data\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "explain_spending_trend",
+          "description": "Explain a spending trend visualization",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "string",
+                "description": "The data that informed the visualization (JSON format)"
+              },
+              "customer_id": {
+                "type": "string",
+                "description": "Optional customer ID for personalized explanations"
+              },
+              "additional_context": {
+                "type": "string",
+                "description": "Any additional context about the visualization"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"type\": \"string\",\n      \"description\": \"The data that informed the visualization (JSON format)\"\n    },\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"Optional customer ID for personalized explanations\"\n    },\n    \"additional_context\": {\n      \"type\": \"string\",\n      \"description\": \"Any additional context about the visualization\"\n    }\n  },\n  \"required\": [\"data\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "explain_investment_allocation",
+          "description": "Explain an investment allocation visualization",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "string",
+                "description": "The data that informed the visualization (JSON format)"
+              },
+              "customer_id": {
+                "type": "string",
+                "description": "Optional customer ID for personalized explanations"
+              },
+              "additional_context": {
+                "type": "string",
+                "description": "Any additional context about the visualization"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"type\": \"string\",\n      \"description\": \"The data that informed the visualization (JSON format)\"\n    },\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"Optional customer ID for personalized explanations\"\n    },\n    \"additional_context\": {\n      \"type\": \"string\",\n      \"description\": \"Any additional context about the visualization\"\n    }\n  },\n  \"required\": [\"data\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "explain_cash_flow",
+          "description": "Explain a cash flow visualization",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "string",
+                "description": "The data that informed the visualization (JSON format)"
+              },
+              "customer_id": {
+                "type": "string",
+                "description": "Optional customer ID for personalized explanations"
+              },
+              "additional_context": {
+                "type": "string",
+                "description": "Any additional context about the visualization"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"type\": \"string\",\n      \"description\": \"The data that informed the visualization (JSON format)\"\n    },\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"Optional customer ID for personalized explanations\"\n    },\n    \"additional_context\": {\n      \"type\": \"string\",\n      \"description\": \"Any additional context about the visualization\"\n    }\n  },\n  \"required\": [\"data\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "explain_budget_performance",
+          "description": "Explain a budget performance visualization",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "string",
+                "description": "The data that informed the visualization (JSON format)"
+              },
+              "customer_id": {
+                "type": "string",
+                "description": "Optional customer ID for personalized explanations"
+              },
+              "additional_context": {
+                "type": "string",
+                "description": "Any additional context about the visualization"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"type\": \"string\",\n      \"description\": \"The data that informed the visualization (JSON format)\"\n    },\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"Optional customer ID for personalized explanations\"\n    },\n    \"additional_context\": {\n      \"type\": \"string\",\n      \"description\": \"Any additional context about the visualization\"\n    }\n  },\n  \"required\": [\"data\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "recommend_financial_products",
+          "description": "Recommend financial products based on visualization insights",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "visualization_type": {
+                "type": "string",
+                "description": "Type of visualization (spending_trend, investment_allocation, cash_flow, budget_performance)"
+              },
+              "data": {
+                "type": "string",
+                "description": "The data that informed the visualization (JSON format)"
+              },
+              "customer_id": {
+                "type": "string",
+                "description": "Optional customer ID for personalized recommendations"
+              }
+            },
+            "required": [
+              "visualization_type",
+              "data"
+            ]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"visualization_type\": {\n      \"type\": \"string\",\n      \"description\": \"Type of visualization (spending_trend, investment_allocation, cash_flow, budget_performance)\"\n    },\n    \"data\": {\n      \"type\": \"string\",\n      \"description\": \"The data that informed the visualization (JSON format)\"\n    },\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"Optional customer ID for personalized recommendations\"\n    }\n  },\n  \"required\": [\"visualization_type\", \"data\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "create_support_ticket",
+          "description": "Create a support ticket for visualization explanation assistance",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "customer_id": {
+                "type": "string",
+                "description": "ID of the customer"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the visualization explanation request"
+              }
+            },
+            "required": [
+              "customer_id",
+              "description"
+            ]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"ID of the customer\"\n    },\n    \"description\": {\n      \"type\": \"string\",\n      \"description\": \"Description of the visualization explanation request\"\n    }\n  },\n  \"required\": [\"customer_id\", \"description\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "get_support_tickets",
+          "description": "Get support tickets for a customer",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "customer_id": {
+                "type": "string",
+                "description": "ID of the customer"
+              },
+              "ticket_id": {
+                "type": "string",
+                "description": "Optional ID of a specific ticket to retrieve"
+              }
+            },
+            "required": [
+              "customer_id"
+            ]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"ID of the customer\"\n    },\n    \"ticket_id\": {\n      \"type\": \"string\",\n      \"description\": \"Optional ID of a specific ticket to retrieve\"\n    }\n  },\n  \"required\": [\"customer_id\"]\n}",
+          "apiResponseType": "TEXT"
+        }
+      ]
+    }
+  ]
+}

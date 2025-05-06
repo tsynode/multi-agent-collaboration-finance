@@ -1,0 +1,85 @@
+[
+  {
+    "visualization_id": "spending_trend_123",
+    "visualization_type": "spending_trend",
+    "customer_id": "1",
+    "time_period": "6_months",
+    "data_points": [
+      {"month": "2025/01", "amount": 3200},
+      {"month": "2025/02", "amount": 3450},
+      {"month": "2025/03", "amount": 2900},
+      {"month": "2025/04", "amount": 3100},
+      {"month": "2025/05", "amount": 3800},
+      {"month": "2025/06", "amount": 3300}
+    ],
+    "categories": [
+      {"name": "Housing", "percentage": 35},
+      {"name": "Food", "percentage": 20},
+      {"name": "Transportation", "percentage": 15},
+      {"name": "Entertainment", "percentage": 10},
+      {"name": "Utilities", "percentage": 10},
+      {"name": "Other", "percentage": 10}
+    ],
+    "metadata": {
+      "chart_title": "Monthly Spending Trend",
+      "y_axis_label": "Amount ($)",
+      "x_axis_label": "Month",
+      "customer_segment": "middle_income"
+    }
+  },
+  {
+    "visualization_id": "investment_allocation_456",
+    "visualization_type": "investment_allocation",
+    "customer_id": "1",
+    "data_points": [
+      {"asset_class": "Stocks", "percentage": 60},
+      {"asset_class": "Bonds", "percentage": 25},
+      {"asset_class": "Cash", "percentage": 10},
+      {"asset_class": "Alternative", "percentage": 5}
+    ],
+    "metadata": {
+      "chart_title": "Investment Portfolio Allocation",
+      "chart_type": "pie",
+      "customer_segment": "middle_income",
+      "risk_profile": "moderate"
+    }
+  },
+  {
+    "visualization_id": "cash_flow_789",
+    "visualization_type": "cash_flow",
+    "customer_id": "2",
+    "time_period": "3_months",
+    "data_points": [
+      {"month": "2025/04", "income": 5500, "expenses": 4800},
+      {"month": "2025/05", "income": 5500, "expenses": 5200},
+      {"month": "2025/06", "income": 6000, "expenses": 5100}
+    ],
+    "metadata": {
+      "chart_title": "Monthly Cash Flow",
+      "chart_type": "bar",
+      "y_axis_label": "Amount ($)",
+      "x_axis_label": "Month",
+      "customer_segment": "young_professional"
+    }
+  },
+  {
+    "visualization_id": "budget_performance_012",
+    "visualization_type": "budget_performance",
+    "customer_id": "3",
+    "data_points": [
+      {"category": "Housing", "planned": 1500, "actual": 1550},
+      {"category": "Food", "planned": 800, "actual": 950},
+      {"category": "Transportation", "planned": 400, "actual": 380},
+      {"category": "Entertainment", "planned": 300, "actual": 450},
+      {"category": "Utilities", "planned": 350, "actual": 330},
+      {"category": "Other", "planned": 200, "actual": 270}
+    ],
+    "metadata": {
+      "chart_title": "Budget Performance - June 2025",
+      "chart_type": "bar",
+      "y_axis_label": "Amount ($)",
+      "x_axis_label": "Category",
+      "customer_segment": "family"
+    }
+  }
+]
