@@ -150,55 +150,85 @@ def generate_insights(analysis_results):
         elif percent_change < -10:
             insights.append(f"Customer's spending decreased by {abs(percent_change):.1f}% compared to the previous month.")
     
-    # Transaction type insights
-    type_data = analysis_results['type_analysis']
-    transaction_types = list(type_data['amount']['sum'].keys())
-    
-    # Find the most common transaction type
-    most_common_type = max(transaction_types, key=lambda x: type_data['amount']['count'][x])
-    insights.append(f"The most frequent transaction type is {most_common_type} with {type_data['amount']['count'][most_common_type]} transactions.")
-    
-    # Find the highest spending category
-    highest_spending_type = max(transaction_types, key=lambda x: type_data['amount']['sum'][x])
-    insights.append(f"The highest spending is on {highest_spending_type} transactions, totaling {type_data['amount']['sum'][highest_spending_type]:.2f}.")
-    
-    # Anomaly insights
-    if analysis_results['anomalies']:
-        insights.append(f"Detected {len(analysis_results['anomalies'])} unusual transactions that deviate significantly from normal spending patterns.")
-    
     return insights
 ```
 
-5. Interpreting Results for Decision-Making
+5. Transaction Projections Algorithm
 
-When presenting the results to customers, focus on actionable insights:
-
-1. **Spending Trends**: Show how spending patterns change over time, highlighting significant increases or decreases.
-2. **Category Analysis**: Identify which transaction categories consume the most resources.
-3. **Anomaly Detection**: Flag unusual transactions that might indicate fraud or unexpected expenses.
-4. **Future Projections**: Provide estimates of future spending based on historical patterns.
-
-Example of translating a natural language query to insights:
+The transaction projections algorithm uses a combination of time series analysis and machine learning to predict future transactions. Here's how it works:
 
 ```python
-# Process a natural language query
-query = "How has customer A's spending changed over the past 3 months?"
-parsed_query = parse_query(query)
-structured_query = construct_query(parsed_query)
-
-# Execute the query and get results
-# (In a real system, this would interact with a database)
-results = execute_query(structured_query)
-
-# Analyze the results
-analysis = analyze_transaction_patterns(parsed_query['customer_id'])
-
-# Generate insights
-insights = generate_insights(analysis)
-
-# Present the insights to the bank operator
-for insight in insights:
-    print(insight)
+def generate_transaction_projections(customer_id):
+    # Get historical transaction data
+    historical_data = get_historical_transactions(customer_id)
+    
+    # Prepare data for time series analysis
+    df = pd.DataFrame(historical_data)
+    df['transaction_date'] = pd.to_datetime(df['day'])
+    df['amount'] = pd.to_numeric(df['transactionAmount'])
+    
+    # Group by month to get monthly patterns
+    monthly_data = df.groupby(df['transaction_date'].dt.strftime('%Y-%m')).agg({
+        'amount': 'sum',
+        'transactionType': lambda x: x.value_counts().index[0]  # Most common transaction type
+    })
+    
+    # Apply time series forecasting (ARIMA model)
+    from statsmodels.tsa.arima.model import ARIMA
+    
+    # Fit ARIMA model to the data
+    model = ARIMA(monthly_data['amount'], order=(1, 1, 1))
+    model_fit = model.fit()
+    
+    # Forecast next 3 months
+    forecast = model_fit.forecast(steps=3)
+    
+    # Prepare projected transactions
+    projections = []
+    current_date = datetime.now()
+    
+    for i, projected_amount in enumerate(forecast):
+        future_date = current_date + relativedelta(months=i+1)
+        projection = {
+            'customer_id': customer_id,
+            'day': future_date.strftime('%Y/%m/01'),
+            'transactionAmount': str(round(projected_amount, 2)),
+            'type': 'projected',
+            'transactionType': monthly_data['transactionType'].iloc[-1]  # Use the most recent transaction type
+        }
+        projections.append(projection)
+    
+    return projections
 ```
 
-This approach allows bank operators to quickly translate natural language questions into meaningful financial insights for their customers, making complex data more accessible and actionable.
+6. Updating Transaction Projections
+
+Users can manually update transaction projections when they have additional information about future financial activities:
+
+```python
+def update_projections(customer_id, month, year, amount, transaction_type='deposit'):
+    # Create a datetime object for the specified month/year
+    projection_date = datetime(int(year), int(month), 1)
+    
+    # Only allow updates for future dates
+    current_date = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    if projection_date >= current_date:
+        # Create the projection item
+        projection_item = {
+            'customer_id': customer_id,
+            'day': projection_date.strftime('%Y/%m/%d'),
+            'transactionAmount': amount,
+            'type': 'projected',
+            'transactionType': transaction_type
+        }
+        
+        # Store in database
+        store_projection(projection_item)
+        
+        return f"Successfully updated projection for {projection_date.strftime('%B %Y')} for customer {customer_id}"
+    else:
+        return f"Cannot update projections for past dates. Please specify a future month and year."
+```
+
+This function allows bank operators to manually override the algorithmically generated projections with more accurate information when available, such as when a customer informs the bank about planned large expenses or income changes.
