@@ -12,6 +12,55 @@ dynamodb_table = os.getenv('dynamodb_table')
 dynamodb_pk = os.getenv('dynamodb_pk')
 dynamodb_sk = os.getenv('dynamodb_sk')
 
+# Define the lambda_handler function at the top level to ensure it's properly exposed
+def lambda_handler(event, context):
+    print(event)
+    
+    # name of the function that should be invoked
+    function = event.get('function', '')
+
+    # parameters to invoke function with
+    parameters = event.get('parameters', [])
+    customer_id = get_named_parameter(event, "customer_id")
+
+    if function == 'explain_visualization':
+        visualization_type = get_named_parameter(event, "visualization_type")
+        data = get_named_parameter(event, "data")
+        additional_context = get_named_parameter(event, "additional_context")
+        result = explain_visualization(data, visualization_type, customer_id, additional_context)
+    elif function == 'explain_spending_trend':
+        data = get_named_parameter(event, "data")
+        additional_context = get_named_parameter(event, "additional_context")
+        result = explain_spending_trend(data, customer_id, additional_context)
+    elif function == 'explain_investment_allocation':
+        data = get_named_parameter(event, "data")
+        additional_context = get_named_parameter(event, "additional_context")
+        result = explain_investment_allocation(data, customer_id, additional_context)
+    elif function == 'explain_cash_flow':
+        data = get_named_parameter(event, "data")
+        additional_context = get_named_parameter(event, "additional_context")
+        result = explain_cash_flow(data, customer_id, additional_context)
+    elif function == 'explain_budget_performance':
+        data = get_named_parameter(event, "data")
+        additional_context = get_named_parameter(event, "additional_context")
+        result = explain_budget_performance(data, customer_id, additional_context)
+    elif function == 'recommend_financial_products':
+        visualization_type = get_named_parameter(event, "visualization_type")
+        data = get_named_parameter(event, "data")
+        result = recommend_financial_products(visualization_type, data, customer_id)
+    elif function == 'create_support_ticket':
+        description = get_named_parameter(event, "description")
+        result = create_support_ticket(customer_id, description)
+    elif function == 'get_support_tickets':
+        ticket_id = get_named_parameter(event, "ticket_id")
+        result = get_support_tickets(customer_id, ticket_id)
+    else:
+        result = f"Error, function '{function}' not recognized"
+
+    response = populate_function_response(event, result)
+    print(response)
+    return response
+
 def get_named_parameter(event, name):
     try:
         return next(item for item in event['parameters'] if item['name'] == name)['value']
@@ -576,6 +625,7 @@ def get_support_tickets(customer_id, ticket_id=None):
                          dynamodb_sk,
                          ticket_id)
 
+# This is the main Lambda handler function that AWS Lambda will call
 def lambda_handler(event, context):
     print(event)
     
