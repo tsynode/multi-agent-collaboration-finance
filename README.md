@@ -1,58 +1,62 @@
-# Energy Efficiency Management System - Multi-Agent Workshop
+# Banking Analytics - Multi-Agent Collaboration
 
 ## Overview
 
-This public AWS workshop showcases the new Amazon Bedrock Agents feature - [multi-agent collaboration capabilities](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-multi-agent-collaboration.html) - through an Energy Efficiency Management System.
-The system consists of a supervisor agent that orchestrates three specialized sub-agents, each handling specific aspects of energy management and customer service.
-The complete workshop can be accessed on [AWS Workshop Studio](https://catalog.us-east-1.prod.workshops.aws/workshops/1031afa5-be84-4a6a-9886-4e19ce67b9c2/en-US).
+This project is an adaptation of the original [AWS Bedrock Multi-Agents Collaboration Workshop](https://github.com/aws-samples/bedrock-multi-agents-collaboration-workshop), refocused on banking analytics applications.
+
+It showcases how the Amazon Bedrock Agents feature - [multi-agent collaboration capabilities](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-multi-agent-collaboration.html) - can be applied in the banking domain to provide enhanced data analysis and insights.
+
+The system consists of a supervisor agent that orchestrates three specialized sub-agents, each handling specific aspects of banking data analysis, visualization explanation, and risk assessment.
 
 ## System Architecture
 
 ```
-├── 1- Forecasting Agent
-├── 2- Solar Panel Agent
-├── 3- Peak Load Manager Agent
-├── 4- Energy Efficiency Management Agent (Supervisor)
+├── 1- Data Analytics Agent
+├── 2- Customer Insights Agent
+├── 3- Risk & Compliance Agent
+├── 4- Banking Insights Supervisor Agent
 └── 5- Clean up
 ```
 
 ## Agents Description
 
-### Energy Efficiency Management Agent (Supervisor)
+### Banking Insights Supervisor Agent
 
 The supervisor agent coordinates the activities of three specialized sub-agents,
-routing customer queries and requests to the appropriate agent while maintaining context and
-ensuring seamless interactions. The architecture looks as following:
-
-![Architecture](img/energy_manager_agent.png)
+routing user queries to the appropriate agent while maintaining context and
+ensuring seamless interactions. It provides comprehensive insights by combining information from multiple agents and data sources.
 
 ### Sub-Agents
 
-#### 1. Forecasting Agent
+#### 1. Data Analytics Agent
 
-- Provides current energy consumption data
-- Provides consumption forecasts
-- Provides user consumption statistics
-- Contains code interpretation capabilities to analyze forecasting data
+- Translates natural language questions into structured data queries
+- Analyzes transaction patterns and customer behaviors
+- Provides trend analysis on key banking metrics
+- Generates forecasts for account growth, transaction volumes, etc.
+- Contains code interpretation capabilities to analyze banking data
 
-#### 2. Solar Panel Agent
+#### 2. Customer Insights Agent
 
-- Provides installation guidelines and requirements
-- Offers maintenance instructions and schedules
-- Enables support ticket creation
-- Tracks existing support tickets
+- Explains data visualizations in natural language
+- Analyzes customer segmentation and profiles
+- Tracks customer lifecycle events (acquisition, engagement, churn)
+- Identifies at-risk customers for potential churn
+- Recommends customer retention strategies
 
-#### 3. Peak Load Manager Agent
+#### 3. Risk & Compliance Agent
 
-- Identifies non-essential processes
-- Analyzes peak vs. off-peak usage
-- Optimizes grid allocation
+- Detects potential fraud patterns in transaction data
+- Monitors regulatory compliance metrics
+- Identifies unusual account activities
+- Assesses credit risk patterns
+- Generates compliance reports and alerts
 
 ## Workshop Contents
 
-1. Forecast agent setup
-2. Solar panel agent setup
-3. Peak load manager agent
+1. Data Analytics agent setup
+2. Customer Insights agent setup
+3. Risk & Compliance agent setup
 4. Multi-agent collaboration setup
 5. Supervisor agent invocation
 6. Clean up
@@ -71,7 +75,7 @@ ensuring seamless interactions. The architecture looks as following:
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/aws-samples/bedrock-multi-agents-collaboration-workshop.git
+git clone https://github.com/tsynode/multi-agent-collaboration-finance.git
 ```
 
 2. Install dependencies:
@@ -96,4 +100,9 @@ For support and questions, please open an issue in the repository.
 
 ---
 
-Note: This workshop is for educational purposes and demonstrates the capabilities of Amazon Bedrock Agents' multi-agent collaboration feature.
+Note: This project demonstrates how Amazon Bedrock Agents' multi-agent collaboration feature can be applied in the banking domain with two key capabilities:
+
+1. **Natural Language to Query Translation**: Allowing users to ask questions about banking data in natural language
+2. **Visualization Explanation**: Providing natural language explanations of data visualizations
+
+This is an adaptation of the original [AWS Bedrock Multi-Agents Collaboration Workshop](https://github.com/aws-samples/bedrock-multi-agents-collaboration-workshop).
