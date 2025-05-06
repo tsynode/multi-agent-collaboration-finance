@@ -1,0 +1,93 @@
+{
+  "name": "DataAnalyticsAgent",
+  "description": "A financial data analytics agent that translates natural language questions into structured data queries and provides insights on financial transactions.",
+  "actionGroups": [
+    {
+      "name": "FinancialAnalytics",
+      "description": "Actions for analyzing financial transaction data",
+      "actions": [
+        {
+          "name": "get_projected_transactions",
+          "description": "Get projected transactions for a customer",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "customer_id": {
+                "type": "string",
+                "description": "ID of the customer"
+              }
+            },
+            "required": ["customer_id"]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"ID of the customer\"\n    }\n  },\n  \"required\": [\"customer_id\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "get_historical_transactions",
+          "description": "Get historical transactions for a customer",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "customer_id": {
+                "type": "string",
+                "description": "ID of the customer"
+              }
+            },
+            "required": ["customer_id"]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"ID of the customer\"\n    }\n  },\n  \"required\": [\"customer_id\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "get_transaction_statistics",
+          "description": "Get transaction statistics for a customer",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "customer_id": {
+                "type": "string",
+                "description": "ID of the customer"
+              }
+            },
+            "required": ["customer_id"]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"ID of the customer\"\n    }\n  },\n  \"required\": [\"customer_id\"]\n}",
+          "apiResponseType": "TEXT"
+        },
+        {
+          "name": "update_projections",
+          "description": "Update projected transactions for a customer",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "customer_id": {
+                "type": "string",
+                "description": "ID of the customer"
+              },
+              "month": {
+                "type": "string",
+                "description": "Month (1-12)"
+              },
+              "year": {
+                "type": "string",
+                "description": "Year (e.g., 2025)"
+              },
+              "amount": {
+                "type": "string",
+                "description": "Transaction amount"
+              },
+              "transaction_type": {
+                "type": "string",
+                "description": "Type of transaction (deposit, withdrawal, transfer, payment)",
+                "enum": ["deposit", "withdrawal", "transfer", "payment"]
+              }
+            },
+            "required": ["customer_id", "month", "year", "amount"]
+          },
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"customer_id\": {\n      \"type\": \"string\",\n      \"description\": \"ID of the customer\"\n    },\n    \"month\": {\n      \"type\": \"string\",\n      \"description\": \"Month (1-12)\"\n    },\n    \"year\": {\n      \"type\": \"string\",\n      \"description\": \"Year (e.g., 2025)\"\n    },\n    \"amount\": {\n      \"type\": \"string\",\n      \"description\": \"Transaction amount\"\n    },\n    \"transaction_type\": {\n      \"type\": \"string\",\n      \"description\": \"Type of transaction (deposit, withdrawal, transfer, payment)\",\n      \"enum\": [\"deposit\", \"withdrawal\", \"transfer\", \"payment\"]\n    }\n  },\n  \"required\": [\"customer_id\", \"month\", \"year\", \"amount\"]\n}",
+          "apiResponseType": "TEXT"
+        }
+      ]
+    }
+  ]
+}
