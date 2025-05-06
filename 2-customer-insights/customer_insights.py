@@ -4,6 +4,8 @@ import uuid
 import boto3
 
 from boto3.dynamodb.conditions import Key, Attr
+from datetime import datetime
+from decimal import Decimal
 
 dynamodb_resource = boto3.resource('dynamodb')
 dynamodb_table = os.getenv('dynamodb_table')
@@ -19,6 +21,43 @@ def get_named_parameter(event, name):
 def populate_function_response(event, response_body):
     return {'response': {'actionGroup': event['actionGroup'], 'function': event['function'],
                 'functionResponse': {'responseBody': {'TEXT': {'body': str(response_body)}}}}}
+
+def put_dynamodb(table_name, item):
+    table = dynamodb_resource.Table(table_name)
+    resp = table.put_item(Item=item)
+    return resp
+
+def read_dynamodb(
+    table_name: str, 
+    pk_field: str,
+    pk_value: str,
+    sk_field: str=None, 
+    sk_value: str=None,
+    attr_key: str=None,
+    attr_val: str=None
+):
+    try:
+        table = dynamodb_resource.Table(table_name)
+        # Create expression
+        if sk_field:
+            key_expression = Key(pk_field).eq(pk_value) & Key(sk_field).eq(sk_value)
+        else:
+            key_expression = Key(pk_field).eq(pk_value)
+
+        if attr_key:
+            attr_expression = Attr(attr_key).eq(attr_val)
+            query_data = table.query(
+                KeyConditionExpression=key_expression,
+                FilterExpression=attr_expression
+            )
+        else:
+            query_data = table.query(
+                KeyConditionExpression=key_expression
+            )
+        
+        return query_data['Items']
+    except Exception:
+        print(f'Error querying table: {table_name}.')
 
 def explain_visualization(data, visualization_type=None, customer_id=None, additional_context=None):
     """
