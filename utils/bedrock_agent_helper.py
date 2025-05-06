@@ -1990,12 +1990,14 @@ class AgentsForAmazonBedrock:
         except self._dynamodb_client.exceptions.ResourceInUseException:
             print(f'Error querying table: {table_name}.')
 
-    def fill_template(self, customer, day, power, kind):
-        line_template = {"customer_id": "null", "day": "", "sumPowerReading": "null", "kind":"null"}
+    def fill_template(self, customer, day, amount, type_val):
+        line_template = {"customer_id": "null", "day": "", "transactionAmount": "null", "type":"null", "transactionType":"null"}
         line_template["customer_id"] = str(customer)
         line_template["day"] = day
-        line_template["sumPowerReading"] = str(power)
-        line_template["kind"] = kind
+        line_template["transactionAmount"] = str(amount)
+        line_template["type"] = type_val
+        # Alternate between deposit and withdrawal based on customer ID
+        line_template["transactionType"] = "deposit" if customer % 2 == 1 else "withdrawal"
         return line_template
 
 
@@ -2005,16 +2007,21 @@ class AgentsForAmazonBedrock:
         output = ""
 
         for customer in range(1,6):
-            current = self.fill_template(customer, formated_cur_date, random.randrange(100, 201, 2), 'measured')
+            # Generate current month transaction (actual)
+            current = self.fill_template(customer, formated_cur_date, random.randrange(1000, 2001, 20), 'actual')
             output += json.dumps(current, ensure_ascii=False) + '\n'
-            for measure in range(1,5):
-                last_month = cur_date - relativedelta(months=measure)
+            
+            for month_offset in range(1,5):
+                # Generate past months transactions (actual)
+                last_month = cur_date - relativedelta(months=month_offset)
                 formated_last_m = f"{last_month.year}/{last_month.month:02d}/01"
-                future_month = cur_date + relativedelta(months=measure)
-                formated_next_m = f"{future_month.year}/{future_month.month:02d}/01"
-                past = self.fill_template(customer, formated_last_m, random.randrange(100, 201, 2), 'measured')
-                future = self.fill_template(customer, formated_next_m, random.randrange(100, 201, 2), 'forecasted')
+                past = self.fill_template(customer, formated_last_m, random.randrange(1000, 2001, 20), 'actual')
                 output += json.dumps(past, ensure_ascii=False) + '\n'
+                
+                # Generate future months transactions (projected)
+                future_month = cur_date + relativedelta(months=month_offset)
+                formated_next_m = f"{future_month.year}/{future_month.month:02d}/01"
+                future = self.fill_template(customer, formated_next_m, random.randrange(1000, 2001, 20), 'projected')
                 output += json.dumps(future, ensure_ascii=False) + '\n'
 
         with open("1_user_sample_data.json", "w") as f:
